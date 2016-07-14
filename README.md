@@ -18,6 +18,12 @@ One option is added to the tool:
                                /to'.
 ```
 
+For example, use rewrites to try a new stylesheet (without modifying code) and proxy to the npm registry:
+
+```
+$ ws --rewrite '/css/* -> /build/styles/$1' '/npm/* -> http://registry.npmjs.org/$1'
+```
+
 ## Config
 
 Config example:
