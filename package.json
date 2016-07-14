@@ -16,10 +16,10 @@
   },
   "dependencies": {
     "array-back": "^1.0.3",
-    "http-proxy": "^1.14.0",
     "koa-rewrite": "^1.1.1",
     "koa-route": "^3.1.0",
     "path-to-regexp": "^1.5.3",
-    "typical": "^2.4.2"
+    "typical": "^2.4.2",
+    "req-then": "~0.3.1"
   }
 }
