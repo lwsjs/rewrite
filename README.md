@@ -13,9 +13,9 @@ Adds URL rewriting to local-web-server. If rewriting to a remote host the reques
 One option is added to the tool:
 
 ```
--r, --rewrite expression ...   A list of URL rewrite rules. For each rule, separate the 'from' and 'to'
-                               routes with '->'. Whitespace surrounded the routes is ignored. E.g. '/from ->
-                               /to'.
+-r, --rewrite expression ...   A list of URL rewrite rules. For each rule, separate the
+                               'from' and 'to' routes with '->'. Whitespace surrounded
+                               the routes is ignored. E.g. '/from -> /to'.
 ```
 
 For example, use rewrites to try a new stylesheet (without modifying code) and proxy to the npm registry:
