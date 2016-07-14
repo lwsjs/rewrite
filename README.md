@@ -22,6 +22,7 @@ One option is added to the tool:
 
 Config example:
 
+```json
 {
   "rewrite": [
     { "from": "/css/*", "to": "/build/styles/$1" },
@@ -30,6 +31,7 @@ Config example:
     { "from": "/:user/repos/:name", "to": "https://api.github.com/repos/:user/:name" }
   ]
 }
+```
 
 * * *
 
