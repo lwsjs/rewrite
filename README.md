@@ -5,3 +5,32 @@
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](https://github.com/feross/standard)
 
 # rewrite
+
+Adds URL rewriting to local-web-server. If rewriting to a remote host the request will be proxied.
+
+## Options
+
+One option is added to the tool:
+
+```
+-r, --rewrite expression ...   A list of URL rewrite rules. For each rule, separate the 'from' and 'to'
+                               routes with '->'. Whitespace surrounded the routes is ignored. E.g. '/from ->
+                               /to'.
+```
+
+## Config
+
+Config example:
+
+{
+  "rewrite": [
+    { "from": "/css/*", "to": "/build/styles/$1" },
+    { "from": "/npm/*", "to": "http://registry.npmjs.org/$1" },
+    { "from": "/broken/*", "to": "http://localhost:9999" },
+    { "from": "/:user/repos/:name", "to": "https://api.github.com/repos/:user/:name" }
+  ]
+}
+
+* * *
+
+&copy; 2016 Lloyd Brookes <75pound@gmail.com>.
