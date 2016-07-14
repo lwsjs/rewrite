@@ -6,7 +6,7 @@
 
 # rewrite
 
-Adds URL rewriting to local-web-server. If rewriting to a remote host the request will be proxied.
+Adds URL rewriting to local-web-server. If rewriting to a remote host the request will be proxied. See [path-to-regexp](https://github.com/pillarjs/path-to-regexp#parameters) for the `from` route syntax.
 
 ## Options
 
