@@ -18,8 +18,8 @@
     "array-back": "^1.0.3",
     "koa-rewrite": "^1.1.1",
     "koa-route": "^3.1.0",
-    "path-to-regexp": "^1.5.3",
-    "typical": "^2.4.2",
-    "req-then": "~0.3.1"
+    "path-to-regexp": "^1.6.0",
+    "typical": "^2.6.0",
+    "req-then": "~0.5.1"
   }
 }
