@@ -15,11 +15,11 @@
     "docs": "jsdoc2md -t jsdoc2md/README.md lib/*.js > README.md; echo"
   },
   "dependencies": {
-    "array-back": "^1.0.3",
-    "koa-rewrite": "^1.1.1",
-    "koa-route": "^3.1.0",
-    "path-to-regexp": "^1.6.0",
+    "array-back": "^1.0.4",
+    "koa-rewrite": "^2.1.0",
+    "koa-route": "^3.2.0",
+    "path-to-regexp": "^1.7.0",
     "typical": "^2.6.0",
-    "req-then": "~0.5.1"
+    "req-then": "~0.6.1"
   }
 }
