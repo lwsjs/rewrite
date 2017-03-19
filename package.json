@@ -3,12 +3,12 @@
   "author": "Lloyd Brookes <75pound@gmail.com>",
   "version": "0.0.0",
   "description": "rewrite",
-  "repository": "https://github.com/local-web-server/rewrite.git",
+  "repository": "https://github.com/lwsjs/rewrite.git",
   "license": "MIT",
   "main": "./lib/rewrite.js",
   "keywords": [],
   "engines": {
-    "node": ">=0.10.0"
+    "node": ">=4.0.0"
   },
   "scripts": {
     "test": "tape test/*.js",
