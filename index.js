@@ -2,6 +2,9 @@
 const EventEmitter = require('events').EventEmitter
 
 class Rewrite extends EventEmitter {
+  description () {
+    return 'Adds URL rewriting. If rewriting to a remote host the request will be proxied.'
+  }
   optionDefinitions () {
     return {
       name: 'rewrite',
@@ -57,7 +60,6 @@ function proxyRequest (route, mw) {
   const url = require('url')
 
   return function proxyMiddleware () {
-    const next = arguments[arguments.length - 1]
     const keys = []
     const routeRe = pathToRegexp(route.from, keys)
     let remoteUrl = this.url.replace(routeRe, route.to)
@@ -80,9 +82,9 @@ function proxyRequest (route, mw) {
     reqOptions.headers.host = reqOptions.host
 
     return new Promise((resolve, reject) => {
-      let buf = new Buffer(0)
+      let buf = Buffer.alloc(0)
       this.req.on('data', chunk => {
-        buf = Buffer.concat([ buf, new Buffer(chunk) ])
+        buf = Buffer.concat([ buf, Buffer.from(chunk) ])
       })
       this.req.on('end', () => {
         mw.emit('verbose', 'Rewrite', `${this.request.method} ${this.request.url} -> ${reqOptions.method} ${reqOptions.href}`)
