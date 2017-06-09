@@ -1,7 +1,6 @@
 'use strict'
-const EventEmitter = require('events').EventEmitter
 
-class Rewrite extends EventEmitter {
+class Rewrite {
   description () {
     return 'Adds URL rewriting. If rewriting to a remote host the request will be proxied.'
   }
@@ -19,7 +18,7 @@ class Rewrite extends EventEmitter {
     const url = require('url')
     const arrayify = require('array-back')
     const routes = parseRewriteRules(arrayify(options.rewrite))
-    this.emit('start', routes)
+    this.view.write('rewrite-routes', routes)
     if (routes.length) {
       return routes.map(route => {
         if (route.to) {
@@ -55,7 +54,7 @@ function parseRewriteRules (rules) {
   })
 }
 
-function proxyRequest (route, mw) {
+function proxyRequest (route, feature) {
   const pathToRegexp = require('path-to-regexp')
   const url = require('url')
 
@@ -87,7 +86,7 @@ function proxyRequest (route, mw) {
         buf = Buffer.concat([ buf, Buffer.from(chunk) ])
       })
       this.req.on('end', () => {
-        mw.emit('verbose', 'Rewrite', `${this.request.method} ${this.request.url} -> ${reqOptions.method} ${reqOptions.href}`)
+        feature.view.write('rewrite-log', `${this.request.method} ${this.request.url} -> ${reqOptions.method} ${reqOptions.href}`)
         request(reqOptions, buf)
           .then(response => {
             this.status = response.res.statusCode
