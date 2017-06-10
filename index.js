@@ -25,11 +25,10 @@ class Rewrite {
           /* `to` address is remote if the url specifies a host */
           if (url.parse(route.to).host) {
             const _ = require('koa-route')
-            return _.all(route.from, proxyRequest(route, this))
+            return _.all(route.from, proxyRequest(route, this.view))
           } else {
             const rewrite = require('koa-rewrite')
             const rmw = rewrite(route.from, route.to)
-            rmw._name = 'rewrite'
             return rmw
           }
         }
@@ -54,15 +53,19 @@ function parseRewriteRules (rules) {
   })
 }
 
-function proxyRequest (route, feature) {
+function proxyRequest (route, view) {
   const pathToRegexp = require('path-to-regexp')
   const url = require('url')
+  let id = 1
 
   return function proxyMiddleware () {
+    const ctx = this
+    ctx.state.id = id++
+    view.write('rewrite-incoming', ctx.request)
+    /* build the remote URL using the 'to' address and route param values */
     const keys = []
     const routeRe = pathToRegexp(route.from, keys)
-    let remoteUrl = this.url.replace(routeRe, route.to)
-
+    let remoteUrl = ctx.url.replace(routeRe, route.to)
     keys.forEach((key, index) => {
       const re = RegExp(`:${key.name}`, 'g')
       remoteUrl = remoteUrl.replace(re, arguments[index + 1] || '')
@@ -70,33 +73,37 @@ function proxyRequest (route, feature) {
 
     const request = require('req-then')
 
-    /* copy incoming request method and header to the proxy request */
-    const reqOptions = Object.assign(url.parse(remoteUrl), {
-      method: this.request.method,
-      headers: this.request.headers
+    /* copy incoming request method and headers to the proxy request */
+    const proxyReq = Object.assign(url.parse(remoteUrl), {
+      id: ctx.state.id,
+      method: ctx.request.method,
+      headers: ctx.request.headers
     })
 
     /* proxy request alterations */
-    reqOptions.host = reqOptions.host
-    reqOptions.headers.host = reqOptions.host
+    proxyReq.host = proxyReq.host
+    proxyReq.headers.host = proxyReq.host
 
     return new Promise((resolve, reject) => {
       let buf = Buffer.alloc(0)
-      this.req.on('data', chunk => {
+      ctx.req.on('data', chunk => {
         buf = Buffer.concat([ buf, Buffer.from(chunk) ])
       })
-      this.req.on('end', () => {
-        feature.view.write('rewrite-log', `${this.request.method} ${this.request.url} -> ${reqOptions.method} ${reqOptions.href}`)
-        request(reqOptions, buf)
+      ctx.req.on('end', () => {
+        view.write('rewrite-proxy', proxyReq)
+        request(proxyReq, buf)
           .then(response => {
-            this.status = response.res.statusCode
-            this.body = response.data
-            this.set(response.res.headers)
+            ctx.status = response.res.statusCode
+            ctx.body = response.data
+            ctx.set(response.res.headers)
+            view.write('rewrite-log', `#${ctx.state.id} ${ctx.request.method} ${ctx.request.url} -> ${proxyReq.method} ${proxyReq.href}`)
           })
           .then(resolve)
           .catch(err => {
-            err.message = `[${err.code}] Failed to proxy to ${reqOptions.href}`
+            err.message = `[${err.code}] Failed to proxy to ${proxyReq.href}`
             reject(err)
+            view.write('rewrite-error', { code: err.code, message: err.message, stack: err.stack })
+            view.write('rewrite-fail', `#${ctx.state.id} ${ctx.request.method} ${ctx.request.url} -> ${proxyReq.method} ${proxyReq.href}`)
           })
       })
     })
