@@ -5,14 +5,16 @@ class Rewrite {
     return 'Adds URL rewriting. If rewriting to a remote host the request will be proxied.'
   }
   optionDefinitions () {
-    return {
-      name: 'rewrite',
-      alias: 'r',
-      type: String,
-      multiple: true,
-      typeLabel: '[underline]{expression} ...',
-      description: "A list of URL rewrite rules. For each rule, separate the 'from' and 'to' routes with '->'. Whitespace surrounded the routes is ignored. E.g. '/from -> /to'."
-    }
+    return [
+      {
+        name: 'rewrite',
+        alias: 'r',
+        type: String,
+        multiple: true,
+        typeLabel: '[underline]{expression} ...',
+        description: "A list of URL rewrite rules. For each rule, separate the 'from' and 'to' routes with '->'. Whitespace surrounded the routes is ignored. E.g. '/from -> /to'."
+      }
+    ]
   }
   middleware (options) {
     const url = require('url')
@@ -71,8 +73,6 @@ function proxyRequest (route, view) {
       remoteUrl = remoteUrl.replace(re, arguments[index + 1] || '')
     })
 
-    const request = require('req-then')
-
     /* copy incoming request method and headers to the proxy request */
     const proxyReq = Object.assign(url.parse(remoteUrl), {
       id: ctx.state.id,
@@ -84,28 +84,26 @@ function proxyRequest (route, view) {
     proxyReq.host = proxyReq.host
     proxyReq.headers.host = proxyReq.host
 
-    return new Promise((resolve, reject) => {
-      let buf = Buffer.alloc(0)
-      ctx.req.on('data', chunk => {
-        buf = Buffer.concat([ buf, Buffer.from(chunk) ])
-      })
-      ctx.req.on('end', () => {
-        view.write('rewrite-proxy', proxyReq)
-        request(proxyReq, buf)
-          .then(response => {
-            ctx.status = response.res.statusCode
-            ctx.body = response.data
-            ctx.set(response.res.headers)
-            view.write('rewrite-log', `#${ctx.state.id} ${ctx.request.method} ${ctx.request.url} -> ${proxyReq.method} ${proxyReq.href}`)
-          })
-          .then(resolve)
-          .catch(err => {
-            err.message = `[${err.code}] Failed to proxy to ${proxyReq.href}`
-            reject(err)
-            view.write('rewrite-error', { code: err.code, message: err.message, stack: err.stack })
-            view.write('rewrite-fail', `#${ctx.state.id} ${ctx.request.method} ${ctx.request.url} -> ${proxyReq.method} ${proxyReq.href}`)
-          })
-      })
+    return new Promise(async (resolve, reject) => {
+      const streamReadAll = require('stream-read-all')
+      const reqData = await streamReadAll(ctx.req)
+      try {
+        view.write('rewrite-proxy-req', { req: proxyReq, data: reqData.toString() })
+        const request = require('req-then')
+        const response = await request(proxyReq, reqData)
+        const viewResponse = Object.assign({}, response)
+        viewResponse.data = viewResponse.data.toString()
+        view.write('rewrite-proxy-res', viewResponse)
+        ctx.status = response.res.statusCode
+        ctx.body = response.data
+        ctx.set(response.res.headers)
+        resolve()
+      } catch (err) {
+        err.message = `[${err.code}] Failed to proxy to ${proxyReq.href}`
+        reject(err)
+        view.write('rewrite-error', { code: err.code, message: err.message, stack: err.stack })
+        view.write('rewrite-fail', `#${ctx.state.id} ${ctx.request.method} ${ctx.request.url} -> ${proxyReq.method} ${proxyReq.href}`)
+      }
     })
   }
 }
