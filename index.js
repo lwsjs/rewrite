@@ -59,6 +59,10 @@ function proxyRequest (route, view) {
   const pathToRegexp = require('path-to-regexp')
   const url = require('url')
   let id = 1
+  const http = require('http')
+  http.globalAgent = new http.Agent({ keepAlive: true })
+  const https = require('https')
+  https.globalAgent = new https.Agent({ keepAlive: true })
 
   return function proxyMiddleware () {
     const ctx = this
@@ -77,11 +81,12 @@ function proxyRequest (route, view) {
     const proxyReq = Object.assign(url.parse(remoteUrl), {
       id: ctx.state.id,
       method: ctx.request.method,
-      headers: ctx.request.headers
+      headers: ctx.request.headers,
+      /* ignore CA verification imperfections by default */
+      rejectUnauthorized: false
     })
 
     /* proxy request alterations */
-    proxyReq.host = proxyReq.host
     proxyReq.headers.host = proxyReq.host
 
     return new Promise(async (resolve, reject) => {
@@ -99,7 +104,6 @@ function proxyRequest (route, view) {
         ctx.set(response.res.headers)
         resolve()
       } catch (err) {
-        err.message = `[${err.code}] Failed to proxy to ${proxyReq.href}`
         reject(err)
         view.write('rewrite-error', { code: err.code, message: err.message, stack: err.stack })
         view.write('rewrite-fail', `#${ctx.state.id} ${ctx.request.method} ${ctx.request.url} -> ${proxyReq.method} ${proxyReq.href}`)
