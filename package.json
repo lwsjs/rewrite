@@ -2,14 +2,15 @@
   "name": "lws-rewrite",
   "author": "Lloyd Brookes <75pound@gmail.com>",
   "version": "0.3.0",
-  "description": "rewrite",
+  "description": "URL rewriting middleware for lws",
   "repository": "https://github.com/lwsjs/rewrite.git",
   "license": "MIT",
   "keywords": [
     "lws",
     "url",
     "rewriting",
-    "rewrite"
+    "rewrite",
+    "proxy"
   ],
   "scripts": {
     "test": "test-runner test/*.js"
