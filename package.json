@@ -12,15 +12,20 @@
     "rewrite"
   ],
   "scripts": {
-    "test": "test-runner test.js"
+    "test": "test-runner test/*.js"
   },
   "dependencies": {
-    "array-back": "^1.0.4",
+    "array-back": "^2.0.0",
     "koa-rewrite": "^2.1.0",
     "koa-route": "^3.2.0",
     "path-to-regexp": "^1.7.0",
-    "req-then": "~0.6.2",
+    "req-then": "^0.6.2",
     "stream-read-all": "^0.1.0",
     "typical": "^2.6.1"
+  },
+  "devDependencies": {
+    "lws": "^1.0.0-pre2.1",
+    "lws-static": "^0.3.0",
+    "test-runner": "^0.4.0"
   }
 }

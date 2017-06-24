@@ -1,8 +1,6 @@
-'use strict'
-
-class Rewrite {
+module.exports = MiddlewareBase => class Rewrite extends MiddlewareBase {
   description () {
-    return 'Adds URL rewriting. If rewriting to a remote host the request will be proxied.'
+    return 'Adds URL rewriting to local or remote targets.'
   }
   optionDefinitions () {
     return [
@@ -20,14 +18,21 @@ class Rewrite {
     const url = require('url')
     const arrayify = require('array-back')
     const routes = parseRewriteRules(arrayify(options.rewrite))
-    this.view.write('rewrite-routes', routes)
+
+    /* re-use proxy sockets using keep-alive  */
+    const http = require('http')
+    http.globalAgent = new http.Agent({ keepAlive: true })
+    const https = require('https')
+    https.globalAgent = new https.Agent({ keepAlive: true })
+
     if (routes.length) {
+      this.emit('verbose', 'middleware.rewrite.config', { rewrite: routes })
       return routes.map(route => {
         if (route.to) {
           /* `to` address is remote if the url specifies a host */
           if (url.parse(route.to).host) {
             const _ = require('koa-route')
-            return _.all(route.from, proxyRequest(route, this.view))
+            return _.all(route.from, proxyRequest(route, this))
           } else {
             const rewrite = require('koa-rewrite')
             const rmw = rewrite(route.from, route.to)
@@ -55,19 +60,15 @@ function parseRewriteRules (rules) {
   })
 }
 
-function proxyRequest (route, view) {
+function proxyRequest (route, mw) {
   const pathToRegexp = require('path-to-regexp')
   const url = require('url')
   let id = 1
-  const http = require('http')
-  http.globalAgent = new http.Agent({ keepAlive: true })
-  const https = require('https')
-  https.globalAgent = new https.Agent({ keepAlive: true })
 
   return function proxyMiddleware () {
     const ctx = this
     ctx.state.id = id++
-    view.write('rewrite-incoming', ctx.request)
+    mw.emit('verbose', 'middleware.rewrite.incoming.request', { id: ctx.state.id, request: ctx.request })
     /* build the remote URL using the 'to' address and route param values */
     const keys = []
     const routeRe = pathToRegexp(route.from, keys)
@@ -79,7 +80,6 @@ function proxyRequest (route, view) {
 
     /* copy incoming request method and headers to the proxy request */
     const proxyReq = Object.assign(url.parse(remoteUrl), {
-      id: ctx.state.id,
       method: ctx.request.method,
       headers: ctx.request.headers,
       /* ignore CA verification imperfections by default */
@@ -93,23 +93,23 @@ function proxyRequest (route, view) {
       const streamReadAll = require('stream-read-all')
       const reqData = await streamReadAll(ctx.req)
       try {
-        view.write('rewrite-proxy-req', { req: proxyReq, data: reqData.toString() })
+        mw.emit('verbose', 'middleware.rewrite.proxy.request', { id: ctx.state.id, req: proxyReq, data: reqData.toString() })
         const request = require('req-then')
         const response = await request(proxyReq, reqData)
         const viewResponse = Object.assign({}, response)
         viewResponse.data = viewResponse.data.toString()
-        view.write('rewrite-proxy-res', viewResponse)
+        /* if JSON was returned, parse it */
+        try {
+          viewResponse.data = JSON.parse(viewResponse.data)
+        } catch (err) {}
+        mw.emit('verbose', 'middleware.rewrite.proxy.response', { id: ctx.state.id, res: viewResponse.res, data: viewResponse.data })
         ctx.status = response.res.statusCode
         ctx.body = response.data
         ctx.set(response.res.headers)
         resolve()
       } catch (err) {
         reject(err)
-        view.write('rewrite-error', { code: err.code, message: err.message, stack: err.stack })
-        view.write('rewrite-fail', `#${ctx.state.id} ${ctx.request.method} ${ctx.request.url} -> ${proxyReq.method} ${proxyReq.href}`)
       }
     })
   }
 }
-
-module.exports = Rewrite
