@@ -34,8 +34,8 @@ module.exports = MiddlewareBase => class Rewrite extends MiddlewareBase {
             const _ = require('koa-route')
             return _.all(route.from, proxyRequest(route, this))
           } else {
-            const rewrite = require('koa-rewrite')
-            const rmw = rewrite(route.from, route.to)
+            const rewrite = require('koa-rewrite-75lb')
+            const rmw = rewrite(route.from, route.to, this)
             return rmw
           }
         }
@@ -68,7 +68,7 @@ function proxyRequest (route, mw) {
   return function proxyMiddleware () {
     const ctx = this
     ctx.state.id = id++
-    mw.emit('verbose', 'middleware.rewrite.incoming.request', { id: ctx.state.id, request: ctx.request })
+    mw.emit('verbose', 'middleware.rewrite.proxy.incoming', { rewriteId: ctx.state.id, request: ctx.request })
     /* build the remote URL using the 'to' address and route param values */
     const keys = []
     const routeRe = pathToRegexp(route.from, keys)
@@ -76,6 +76,11 @@ function proxyRequest (route, mw) {
     keys.forEach((key, index) => {
       const re = RegExp(`:${key.name}`, 'g')
       remoteUrl = remoteUrl.replace(re, arguments[index + 1] || '')
+    })
+
+    mw.emit('verbose', 'middleware.rewrite.proxy', {
+      from: ctx.url,
+      to: remoteUrl
     })
 
     /* copy incoming request method and headers to the proxy request */
@@ -93,7 +98,7 @@ function proxyRequest (route, mw) {
       const streamReadAll = require('stream-read-all')
       const reqData = await streamReadAll(ctx.req)
       try {
-        mw.emit('verbose', 'middleware.rewrite.proxy.request', { id: ctx.state.id, req: proxyReq, data: reqData.toString() })
+        mw.emit('verbose', 'middleware.rewrite.proxy.request', { rewriteId: ctx.state.id, req: proxyReq, data: reqData.toString() })
         const request = require('req-then')
         const response = await request(proxyReq, reqData)
         const viewResponse = Object.assign({}, response)
@@ -102,7 +107,7 @@ function proxyRequest (route, mw) {
         try {
           viewResponse.data = JSON.parse(viewResponse.data)
         } catch (err) {}
-        mw.emit('verbose', 'middleware.rewrite.proxy.response', { id: ctx.state.id, res: viewResponse.res, data: viewResponse.data })
+        mw.emit('verbose', 'middleware.rewrite.proxy.response', { rewriteId: ctx.state.id, res: viewResponse.res, data: viewResponse.data })
         ctx.status = response.res.statusCode
         ctx.body = response.data
         ctx.set(response.res.headers)

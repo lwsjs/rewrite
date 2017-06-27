@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "array-back": "^2.0.0",
-    "koa-rewrite": "^2.1.0",
+    "koa-rewrite-75lb": "^2.1.1",
     "koa-route": "^3.2.0",
     "path-to-regexp": "^1.7.0",
     "req-then": "^0.6.2",
