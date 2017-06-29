@@ -20,13 +20,13 @@
     "koa-rewrite-75lb": "^2.1.1",
     "koa-route": "^3.2.0",
     "path-to-regexp": "^1.7.0",
-    "req-then": "^0.6.2",
+    "req-then": "^0.6.4",
     "stream-read-all": "^0.1.0",
     "typical": "^2.6.1"
   },
   "devDependencies": {
-    "lws": "^1.0.0-pre2.1",
-    "lws-static": "^0.3.0",
+    "lws": "^1.0.0-pre2.6",
+    "lws-static": "^0.3.4",
     "test-runner": "^0.4.0"
   }
 }

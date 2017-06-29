@@ -68,7 +68,6 @@ function proxyRequest (route, mw) {
   return function proxyMiddleware () {
     const ctx = this
     ctx.state.id = id++
-    mw.emit('verbose', 'middleware.rewrite.proxy.incoming', { rewriteId: ctx.state.id, request: ctx.request })
     /* build the remote URL using the 'to' address and route param values */
     const keys = []
     const routeRe = pathToRegexp(route.from, keys)
@@ -101,16 +100,23 @@ function proxyRequest (route, mw) {
         mw.emit('verbose', 'middleware.rewrite.proxy.request', { rewriteId: ctx.state.id, req: proxyReq, data: reqData.toString() })
         const request = require('req-then')
         const response = await request(proxyReq, reqData)
-        const viewResponse = Object.assign({}, response)
-        viewResponse.data = viewResponse.data.toString()
-        /* if JSON was returned, parse it */
-        try {
-          viewResponse.data = JSON.parse(viewResponse.data)
-        } catch (err) {}
-        mw.emit('verbose', 'middleware.rewrite.proxy.response', { rewriteId: ctx.state.id, res: viewResponse.res, data: viewResponse.data })
         ctx.status = response.res.statusCode
         ctx.body = response.data
         ctx.set(response.res.headers)
+
+        const viewResponse = Object.assign({}, response)
+        if (typeof viewResponse.data === 'string' || Buffer.isBuffer(viewResponse.data)) {
+          viewResponse.data = viewResponse.data.toString()
+          /* if JSON was returned, parse it */
+          try {
+            viewResponse.data = JSON.parse(viewResponse.data)
+          } catch (err) {}
+        }
+        mw.emit('verbose', 'middleware.rewrite.proxy.response', {
+          rewriteId: ctx.state.id,
+          res: viewResponse.res,
+          data: viewResponse.data
+        })
         resolve()
       } catch (err) {
         reject(err)

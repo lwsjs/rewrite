@@ -48,9 +48,9 @@ brace-expansion@^1.1.7:
     balanced-match "^1.0.0"
     concat-map "0.0.1"
 
-byte-size@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/byte-size/-/byte-size-4.0.0.tgz#1b6c23d9b2a0eaa6a4c11e6313b815c099323db7"
+byte-size@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/byte-size/-/byte-size-4.0.1.tgz#59b2f8277277e1e538fee1e4d02b0ddd82fb09c6"
 
 cli-commands@^0.3.2:
   version "0.3.2"
@@ -85,6 +85,15 @@ command-line-usage@^4.0.0:
     array-back "^1.0.4"
     table-layout "^0.4.0"
     typical "^2.6.0"
+
+command-line-usage@^4.1.0-0:
+  version "4.1.0-0"
+  resolved "https://registry.yarnpkg.com/command-line-usage/-/command-line-usage-4.1.0-0.tgz#2219c8fb610131bec47ea139e75a7c38c4097b1b"
+  dependencies:
+    ansi-escape-sequences "^3.0.0"
+    array-back "^2.0.0"
+    table-layout "^0.4.0"
+    typical "^2.6.1"
 
 concat-map@0.0.1:
   version "0.0.1"
@@ -185,6 +194,10 @@ glob@^7.1.0:
     minimatch "^3.0.4"
     once "^1.3.0"
     path-is-absolute "^1.0.0"
+
+home-path@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/home-path/-/home-path-1.0.5.tgz#788b29815b12d53bacf575648476e6f9041d133f"
 
 http-assert@^1.1.0:
   version "1.3.0"
@@ -335,29 +348,30 @@ lodash.pick@^4.4.0:
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/lodash.pick/-/lodash.pick-4.4.0.tgz#52f05610fff9ded422611441ed1fc123a03001b3"
 
-lws-static@^0.3.0:
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/lws-static/-/lws-static-0.3.0.tgz#ce5312e966f7f8ff916bf92f92a4091eae83d52e"
+lws-static@^0.3.4:
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/lws-static/-/lws-static-0.3.4.tgz#7a464ad76d4ee9420fb158e3fd825580fdf264d5"
   dependencies:
     koa-static "^3.0.0"
 
-lws@^1.0.0-pre2.1:
-  version "1.0.0-pre2.1"
-  resolved "https://registry.yarnpkg.com/lws/-/lws-1.0.0-pre2.1.tgz#2b7a2189219f6c5d1001e39e86475d0543ac2c26"
+lws@^1.0.0-pre2.6:
+  version "1.0.0-pre2.6"
+  resolved "https://registry.yarnpkg.com/lws/-/lws-1.0.0-pre2.6.tgz#35afc28e739e887899968aad12b973fac99909a5"
   dependencies:
     ansi-escape-sequences "^3.0.0"
-    array-back "^1.0.4"
+    array-back "^2.0.0"
     array-base "^1.0.1"
-    byte-size "^4.0.0"
+    byte-size "^4.0.1"
     cli-commands "^0.3.2"
     command-line-args "^4.0.6"
-    command-line-usage "^4.0.0"
+    command-line-usage "^4.1.0-0"
     koa "^2.3.0"
     load-module "^0.2.3"
     lodash.assignwith "^4.2.0"
     lodash.camelcase "^4.3.0"
     reduce-flatten "^1.0.1"
     typical "^2.6.1"
+    usage-stats "^0.9.3"
     walk-back "^3.0.0"
 
 media-typer@0.3.0:
@@ -383,6 +397,10 @@ minimatch@^3.0.4:
   resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-3.0.4.tgz#5166e286457f03306064be5497e8dbb0c3d32083"
   dependencies:
     brace-expansion "^1.1.7"
+
+mkdirp2@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/mkdirp2/-/mkdirp2-1.0.3.tgz#cc8dd8265f1f06e2d8f5b10b6e52f4e050bed21b"
 
 ms@2.0.0:
   version "2.0.0"
@@ -443,6 +461,16 @@ req-then@^0.6.2:
   resolved "https://registry.yarnpkg.com/req-then/-/req-then-0.6.2.tgz#7f9e6ebbcab327adc9280aa92b3698d3fc1c5b0d"
   dependencies:
     array-back "^1.0.4"
+    defer-promise "^1.0.1"
+    lodash.pick "^4.4.0"
+    stream-read-all "^0.1.0"
+    typical "^2.6.1"
+
+req-then@^0.6.4:
+  version "0.6.4"
+  resolved "https://registry.yarnpkg.com/req-then/-/req-then-0.6.4.tgz#9f9c04626afd311ae01d727846a0a1075c0e1965"
+  dependencies:
+    array-back "^2.0.0"
     defer-promise "^1.0.1"
     lodash.pick "^4.4.0"
     stream-read-all "^0.1.0"
@@ -523,6 +551,21 @@ type-is@^1.5.5:
 typical@^2.6.0, typical@^2.6.1:
   version "2.6.1"
   resolved "https://registry.yarnpkg.com/typical/-/typical-2.6.1.tgz#5c080e5d661cbbe38259d2e70a3c7253e873881d"
+
+usage-stats@^0.9.3:
+  version "0.9.3"
+  resolved "https://registry.yarnpkg.com/usage-stats/-/usage-stats-0.9.3.tgz#6c906491becb9b4e8659f2e0d27f337fcf8f087e"
+  dependencies:
+    array-back "^2.0.0"
+    home-path "^1.0.5"
+    mkdirp2 "^1.0.3"
+    req-then "^0.6.2"
+    typical "^2.6.1"
+    uuid "^3.1.0"
+
+uuid@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.1.0.tgz#3dd3d3e790abc24d7b0d3a034ffababe28ebbc04"
 
 vary@^1.0.0:
   version "1.1.1"
