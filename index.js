@@ -94,10 +94,21 @@ function proxyRequest (route, mw) {
     proxyReq.headers.host = proxyReq.host
 
     return new Promise(async (resolve, reject) => {
-      const streamReadAll = require('stream-read-all')
-      const reqData = await streamReadAll(ctx.req)
+      let reqData
+      if (ctx.request.rawBody) {
+        reqData = ctx.request.rawBody
+      } else {
+        const streamReadAll = require('stream-read-all')
+        reqData = await streamReadAll(ctx.req)
+      }
       try {
-        mw.emit('verbose', 'middleware.rewrite.proxy.request', { rewriteId: ctx.state.id, req: proxyReq, data: reqData.toString() })
+        const reqInfo = {
+          rewriteId: ctx.state.id,
+          req: proxyReq
+        }
+        if (reqData.length) reqInfo.data = reqData.toString()
+        mw.emit('verbose', 'middleware.rewrite.proxy.request', reqInfo)
+
         const request = require('req-then')
         const response = await request(proxyReq, reqData)
         ctx.status = response.res.statusCode

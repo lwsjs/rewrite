@@ -354,9 +354,9 @@ lws-static@^0.3.4:
   dependencies:
     koa-static "^3.0.0"
 
-lws@^1.0.0-pre2.6:
-  version "1.0.0-pre2.6"
-  resolved "https://registry.yarnpkg.com/lws/-/lws-1.0.0-pre2.6.tgz#35afc28e739e887899968aad12b973fac99909a5"
+lws@^1.0.0-pre2.7:
+  version "1.0.0-pre2.7"
+  resolved "https://registry.yarnpkg.com/lws/-/lws-1.0.0-pre2.7.tgz#e0bceb55be53261f370a227da0f750cf3279e21f"
   dependencies:
     ansi-escape-sequences "^3.0.0"
     array-back "^2.0.0"
@@ -456,17 +456,7 @@ reduce-flatten@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/reduce-flatten/-/reduce-flatten-1.0.1.tgz#258c78efd153ddf93cb561237f61184f3696e327"
 
-req-then@^0.6.2:
-  version "0.6.2"
-  resolved "https://registry.yarnpkg.com/req-then/-/req-then-0.6.2.tgz#7f9e6ebbcab327adc9280aa92b3698d3fc1c5b0d"
-  dependencies:
-    array-back "^1.0.4"
-    defer-promise "^1.0.1"
-    lodash.pick "^4.4.0"
-    stream-read-all "^0.1.0"
-    typical "^2.6.1"
-
-req-then@^0.6.4:
+req-then@^0.6.2, req-then@^0.6.4:
   version "0.6.4"
   resolved "https://registry.yarnpkg.com/req-then/-/req-then-0.6.4.tgz#9f9c04626afd311ae01d727846a0a1075c0e1965"
   dependencies:
@@ -495,9 +485,9 @@ setprototypeof@1.0.3:
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/statuses/-/statuses-1.3.1.tgz#faf51b9eb74aaef3b3acf4ad5f61abf24cb7b93e"
 
-stream-read-all@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/stream-read-all/-/stream-read-all-0.1.0.tgz#04fd4498d4f29717f5b7f316354425cf318c6385"
+stream-read-all@^0.1.0, stream-read-all@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/stream-read-all/-/stream-read-all-0.1.1.tgz#3212266899ffa9b8d0d9aa1f0b7bec897ba6c977"
   dependencies:
     test-runner "^0.4.0"
 
