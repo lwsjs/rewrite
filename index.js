@@ -1,6 +1,6 @@
 module.exports = MiddlewareBase => class Rewrite extends MiddlewareBase {
   description () {
-    return 'URL Rewriting. Re-route requests to local or remote destinations.'
+    return 'URL Rewriting. Use to re-route requests to local or remote destinations.'
   }
   optionDefinitions () {
     return [
