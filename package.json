@@ -25,7 +25,7 @@
     "typical": "^2.6.1"
   },
   "devDependencies": {
-    "lws": "^1.0.0-pre4.0",
+    "lws": "^1.1.4",
     "lws-static": "^0.4.1",
     "test-runner": "^0.4.0"
   }

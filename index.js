@@ -63,6 +63,7 @@ function parseRewriteRules (rules) {
 function proxyRequest (route, mw) {
   const pathToRegexp = require('path-to-regexp')
   const url = require('url')
+  const t = require('typical')
   let id = 1
 
   return function proxyMiddleware () {
@@ -73,8 +74,10 @@ function proxyRequest (route, mw) {
     const routeRe = pathToRegexp(route.from, keys)
     let remoteUrl = ctx.url.replace(routeRe, route.to)
     keys.forEach((key, index) => {
-      const re = RegExp(`:${key.name}`, 'g')
-      remoteUrl = remoteUrl.replace(re, arguments[index + 1] || '')
+      if (t.isString(key.name)) {
+        const re = RegExp(`:${key.name}`, 'g')
+        remoteUrl = remoteUrl.replace(re, arguments[index + 1] || '')
+      }
     })
 
     mw.emit('verbose', 'middleware.rewrite.proxy', {
