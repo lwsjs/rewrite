@@ -10,4 +10,4 @@ URL rewriting middleware for lws. For usage instructions see [here](https://gith
 
 * * *
 
-&copy; 2016-17 Lloyd Brookes <75pound@gmail.com>.
+&copy; 2016-18 Lloyd Brookes <75pound@gmail.com>.

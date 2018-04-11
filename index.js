@@ -9,7 +9,7 @@ module.exports = MiddlewareBase => class Rewrite extends MiddlewareBase {
         alias: 'r',
         type: String,
         multiple: true,
-        typeLabel: '[underline]{expression} ...',
+        typeLabel: '{underline expression} ...',
         description: "A list of URL rewrite rules. For each rule, separate the 'from' and 'to' routes with '->'. Whitespace surrounded the routes is ignored. E.g. '/from -> /to'."
       }
     ]
