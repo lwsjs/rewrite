@@ -19,12 +19,6 @@ module.exports = MiddlewareBase => class Rewrite extends MiddlewareBase {
     const arrayify = require('array-back')
     const routes = parseRewriteRules(arrayify(options.rewrite))
 
-    /* re-use proxy sockets using keep-alive  */
-    const http = require('http')
-    http.globalAgent = new http.Agent({ keepAlive: true })
-    const https = require('https')
-    https.globalAgent = new https.Agent({ keepAlive: true })
-
     if (routes.length) {
       this.emit('verbose', 'middleware.rewrite.config', { rewrite: routes })
       return routes.map(route => {
