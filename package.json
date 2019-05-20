@@ -12,21 +12,27 @@
     "rewrite",
     "proxy"
   ],
+  "engines": {
+    "node": ">=8"
+  },
   "scripts": {
     "test": "test-runner test/*.js"
   },
   "dependencies": {
-    "array-back": "^2.0.0",
+    "array-back": "^3.1.0",
     "koa-rewrite-75lb": "^2.1.1",
     "koa-route": "^3.2.0",
     "path-to-regexp": "^1.7.0",
-    "req-then": "^0.6.4",
-    "stream-read-all": "^0.1.2",
-    "typical": "^2.6.1"
+    "stream-read-all": "^2.0.0",
+    "typical": "^5.0.0"
   },
   "devDependencies": {
-    "lws": "^1.2.3",
+    "lws": "^1.3.1",
     "lws-static": "^0.5.0",
-    "test-runner": "^0.5.0"
-  }
+    "node-fetch": "^2.6.0",
+    "test-runner": "^0.6.0"
+  },
+  "files": [
+    "index.js"
+  ]
 }

@@ -47,7 +47,7 @@ module.exports = MiddlewareBase => class Rewrite extends MiddlewareBase {
 function parseRewriteRules (rules) {
   const t = require('typical')
   return rules && rules.map(rule => {
-    if (t.isString(rule)) {
+    if (typeof rule === 'string') {
       const matches = rule.match(/(\S*)\s*->\s*(\S*)/)
       if (!(matches && matches.length >= 3)) throw new Error('Invalid rule: ' + rule)
       return {
