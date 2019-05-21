@@ -74,7 +74,7 @@ function proxyRequest (route, mw) {
     const routeRe = pathToRegexp(route.from, keys)
     let remoteUrl = ctx.url.replace(routeRe, route.to)
     keys.forEach((key, index) => {
-      if (t.isString(key.name)) {
+      if (typeof key.name === 'string') {
         const re = RegExp(`:${key.name}`, 'g')
         remoteUrl = remoteUrl.replace(re, arguments[index + 1] || '')
       }
