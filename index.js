@@ -1,3 +1,7 @@
+// initialize proxy support
+require('global-agent').bootstrap();
+global.GLOBAL_AGENT.HTTP_PROXY = process.env.HTTP_PROXY
+
 module.exports = MiddlewareBase => class Rewrite extends MiddlewareBase {
   description () {
     return 'URL Rewriting. Use to re-route requests to local or remote destinations.'
