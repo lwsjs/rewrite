@@ -5,7 +5,7 @@ const Lws = require('lws')
 const fetch = require('node-fetch')
 const a = require('assert')
 
-const tom = module.exports = new Tom('rewrite')
+const tom = module.exports = new Tom('local')
 
 tom.test('simple', async function () {
   const port = 8000 + this.index
@@ -17,6 +17,21 @@ tom.test('simple', async function () {
     rewrite: { from: '/two.html', to: '/one.html' }
   })
   const response = await fetch(`http://localhost:${port}/two.html`)
+  const body = await response.text()
+  a.strictEqual(body, 'one\n')
+  server.close()
+})
+
+tom.test('wildcard parameter', async function () {
+  const port = 8000 + this.index
+  const lws = new Lws()
+  const server = lws.listen({
+    port,
+    stack: [ Rewrite, Static ],
+    directory: 'test/fixture',
+    rewrite: { from: '/(.*)', to: '/$1.html' }
+  })
+  const response = await fetch(`http://localhost:${port}/one`)
   const body = await response.text()
   a.strictEqual(body, 'one\n')
   server.close()
