@@ -41,7 +41,7 @@ module.exports = MiddlewareBase => class Rewrite extends MiddlewareBase {
 
 function proxyRequest (route, mw) {
   let id = 1
-  return async function proxyMiddleware (ctx, ...paramValues) {
+  return async function proxyMiddleware (ctx) {
     const util = require('./lib/util')
     ctx.state.id = id++
 
@@ -55,7 +55,7 @@ function proxyRequest (route, mw) {
     }
 
     /* get remote URL */
-    const remoteUrl = util.getToUrl(ctx.url, route, paramValues)
+    const remoteUrl = util.getToUrl(ctx.url, route)
 
     mw.emit('verbose', 'middleware.rewrite.proxy', {
       from: ctx.url,
@@ -73,29 +73,23 @@ function proxyRequest (route, mw) {
 
     const response = await util.fetchRemoteResource(remoteUrl, ctx.request.method, ctx.request.headers, reqBody)
 
-    ctx.status = response.statusCode
-    const ignored = [ 'transfer-encoding', 'content-encoding' ]
-    // for (const [ key, value ] of response.headers) {
-    //   if (!ignored.includes(key.toLowerCase())) {
-    //     console.log('set', key, value)
-    //     ctx.response.set(key, value)
-    //   }
-    // }
-    ctx.response.set('content-type', response.headers['content-type'])
-    ctx.response.body = response.body
+    /* emit remote response */
+    mw.emit('verbose', 'middleware.rewrite.proxy.response', {
+      rewriteId: ctx.state.id,
+      status: response.statusCode,
+      headers: response.headers,
+      body: response.body
+    })
 
-    // const viewResponse = Object.assign({}, response)
-    // if (typeof viewResponse.data === 'string' || Buffer.isBuffer(viewResponse.data)) {
-    //   viewResponse.data = viewResponse.data.toString()
-    //   /* if JSON was returned, parse it */
-    //   try {
-    //     viewResponse.data = JSON.parse(viewResponse.data)
-    //   } catch (err) {}
-    // }
-    // mw.emit('verbose', 'middleware.rewrite.proxy.response', {
-    //   rewriteId: ctx.state.id,
-    //   res: viewResponse.res,
-    //   data: viewResponse.data
-    // })
+    /* copy remote headers to the response */
+    const ignored = [ 'transfer-encoding', 'content-encoding' ]
+    for (const key in response.headers) {
+      if (!ignored.includes(key.toLowerCase())) {
+        ctx.response.set(key, response.headers[key])
+      }
+    }
+
+    ctx.status = response.statusCode
+    ctx.response.body = response.body
   }
 }
