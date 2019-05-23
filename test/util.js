@@ -10,6 +10,12 @@ tom.test('parseRewriteRules: empty', async function () {
   a.deepStrictEqual(result, [])
 })
 
+tom.test('parseRewriteRules: undefined', async function () {
+  const rules = undefined
+  const result = util.parseRewriteRules(rules)
+  a.deepStrictEqual(result, [])
+})
+
 tom.test('parseRewriteRules', async function () {
   const rules = [
     '/one -> /two',
