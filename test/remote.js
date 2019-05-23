@@ -15,6 +15,7 @@ tom.test('GET', async function () {
     stack: [ Rewrite, Static ],
     rewrite: { from: '/json/:name/:id', to: 'https://jsonplaceholder.typicode.com/posts/:id' }
   })
+  // lws.on('verbose', console.error)
   try {
     const response = await fetch(`http://localhost:${port}/json/lloyd/1`)
     a.strictEqual(response.status, 200)
@@ -25,7 +26,7 @@ tom.test('GET', async function () {
   }
 })
 
-tom.only('POST', async function () {
+tom.test('POST', async function () {
   const port = 8100 + this.index
   const lws = new Lws()
   const server = lws.listen({
@@ -45,7 +46,6 @@ tom.only('POST', async function () {
         'Content-type': 'application/json; charset=UTF-8'
       }
     })
-    console.log('RESPONSE HEADERS', response.headers)
     a.strictEqual(response.status, 201)
     const body = await response.json()
     a.strictEqual(body.title, 'title')

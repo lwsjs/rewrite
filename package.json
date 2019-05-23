@@ -16,7 +16,7 @@
     "node": ">=8"
   },
   "scripts": {
-    "test": "test-runner test/*.js",
+    "test": "npx test-runner test/local.js test/remote.js test/util.js && npx test-runner test/http-proxy.js",
     "cover": "nyc npm test && nyc report --reporter=text-lcov | coveralls"
   },
   "dependencies": {

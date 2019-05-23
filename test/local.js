@@ -8,7 +8,7 @@ const a = require('assert')
 const tom = module.exports = new Tom('local')
 
 tom.test('simple', async function () {
-  const port = 8000 + this.index
+  const port = 8050 + this.index
   const lws = new Lws()
   const server = lws.listen({
     port,
@@ -23,7 +23,7 @@ tom.test('simple', async function () {
 })
 
 tom.test('wildcard parameter', async function () {
-  const port = 8000 + this.index
+  const port = 8050 + this.index
   const lws = new Lws()
   const server = lws.listen({
     port,
