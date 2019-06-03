@@ -1,4 +1,6 @@
-module.exports = MiddlewareBase => class Rewrite extends MiddlewareBase {
+const EventEmitter = require('events')
+
+class Rewrite extends EventEmitter {
   description () {
     return 'URL Rewriting. Use to re-route requests to local or remote destinations.'
   }
@@ -93,3 +95,5 @@ function proxyRequest (route, mw) {
     ctx.response.body = response.body
   }
 }
+
+module.exports = Rewrite

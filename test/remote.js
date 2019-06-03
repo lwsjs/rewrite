@@ -9,8 +9,7 @@ const tom = module.exports = new Tom('remote')
 
 tom.test('GET', async function () {
   const port = 8100 + this.index
-  const lws = new Lws()
-  const server = lws.listen({
+  const lws = Lws.create({
     port,
     stack: [ Rewrite, Static ],
     rewrite: { from: '/json/:name/:id', to: 'https://jsonplaceholder.typicode.com/posts/:id' }
@@ -22,14 +21,13 @@ tom.test('GET', async function () {
     const body = await response.json()
     a.strictEqual(body.id, 1)
   } finally {
-    server.close()
+    lws.server.close()
   }
 })
 
 tom.test('POST', async function () {
   const port = 8100 + this.index
-  const lws = new Lws()
-  const server = lws.listen({
+  const lws = Lws.create({
     port,
     stack: [ Rewrite, Static ],
     rewrite: { from: '/api/posts', to: 'https://jsonplaceholder.typicode.com/posts' }
@@ -51,6 +49,6 @@ tom.test('POST', async function () {
     a.strictEqual(body.title, 'title')
     a.strictEqual(body.body, 'body')
   } finally {
-    server.close()
+    lws.server.close()
   }
 })

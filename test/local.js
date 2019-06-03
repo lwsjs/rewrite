@@ -9,8 +9,7 @@ const tom = module.exports = new Tom('local')
 
 tom.test('simple', async function () {
   const port = 8050 + this.index
-  const lws = new Lws()
-  const server = lws.listen({
+  const lws = Lws.create({
     port,
     stack: [ Rewrite, Static ],
     directory: 'test/fixture',
@@ -19,13 +18,12 @@ tom.test('simple', async function () {
   const response = await fetch(`http://localhost:${port}/two.html`)
   const body = await response.text()
   a.strictEqual(body, 'one\n')
-  server.close()
+  lws.server.close()
 })
 
 tom.test('wildcard parameter', async function () {
   const port = 8050 + this.index
-  const lws = new Lws()
-  const server = lws.listen({
+  const lws = Lws.create({
     port,
     stack: [ Rewrite, Static ],
     directory: 'test/fixture',
@@ -34,5 +32,5 @@ tom.test('wildcard parameter', async function () {
   const response = await fetch(`http://localhost:${port}/one`)
   const body = await response.text()
   a.strictEqual(body, 'one\n')
-  server.close()
+  lws.server.close()
 })

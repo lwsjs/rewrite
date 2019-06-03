@@ -9,8 +9,7 @@ const tom = module.exports = new Tom('proxy')
 
 tom.test('CONNECT request made to proxy', async function () {
   const port = 8200 + this.index
-  const lws = new Lws()
-  const server = lws.listen({
+  const lws = Lws.create({
     port,
     stack: [ Rewrite, Static ],
     rewrite: { from: '/one', to: 'https://jsonplaceholder.typicode.com/posts/1' }
@@ -30,7 +29,7 @@ tom.test('CONNECT request made to proxy', async function () {
     delete process.env.http_proxy
     a.strictEqual(proxyConnected, true)
   } finally {
-    server.close()
+    lws.server.close()
     proxyServer.close()
   }
 })
