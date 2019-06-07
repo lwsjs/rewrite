@@ -59,25 +59,27 @@ function proxyRequest (route, mw) {
     /* get remote URL */
     const remoteUrl = util.getToUrl(ctx.url, route)
 
-    mw.emit('verbose', 'middleware.rewrite.proxy', {
+    /* info about this rewrite */
+    const rewrite = {
+      id: ctx.state.id,
       from: ctx.url,
       to: remoteUrl
-    })
+    }
 
     /* emit verbose info */
     const reqInfo = {
-      rewriteId: ctx.state.id,
+      rewrite,
       method: ctx.request.method,
       headers: ctx.request.headers
     }
     if (reqBody && reqBody.length) reqInfo.body = reqBody.toString()
-    mw.emit('verbose', 'middleware.rewrite.proxy.request', reqInfo)
+    mw.emit('verbose', 'middleware.rewrite.remote.request', reqInfo)
 
     const response = await util.fetchRemoteResource(remoteUrl, ctx.request.method, ctx.request.headers, reqBody)
 
     /* emit remote response */
-    mw.emit('verbose', 'middleware.rewrite.proxy.response', {
-      rewriteId: ctx.state.id,
+    mw.emit('verbose', 'middleware.rewrite.remote.response', {
+      rewrite,
       status: response.statusCode,
       headers: response.headers,
       body: response.body
