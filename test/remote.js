@@ -14,7 +14,6 @@ tom.test('GET', async function () {
     stack: [ Rewrite, Static ],
     rewrite: { from: '/json/:name/:id', to: 'https://jsonplaceholder.typicode.com/posts/:id' }
   })
-  // lws.on('verbose', console.error)
   try {
     const response = await fetch(`http://localhost:${port}/json/lloyd/1`)
     a.strictEqual(response.status, 200)
