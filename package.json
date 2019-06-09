@@ -7,6 +7,7 @@
   "license": "MIT",
   "keywords": [
     "lws",
+    "lws-middleware",
     "url",
     "rewriting",
     "rewrite",
@@ -29,8 +30,8 @@
   },
   "devDependencies": {
     "coveralls": "^3.0.4",
-    "lws": "^2.0.0-10",
-    "lws-static": "^1.1.0",
+    "lws": "^2.0.0",
+    "lws-static": "^1.1.1",
     "node-fetch": "^2.6.0",
     "nyc": "^14.1.1",
     "test-runner": "^0.6.0"

@@ -9,6 +9,14 @@
 
 [lws](https://github.com/lwsjs/lws) middleware plugin adding URL rewriting support. For usage instructions see [here](https://github.com/lwsjs/local-web-server/wiki/How-to-rewrite-URLs-to-local-or-remote-destinations).
 
+Adds the following options to lws.
+
+```
+--rewrite, -r expression ...   A list of URL rewrite rules. For each rule, separate the 'from' and 'to'
+                               routes with '->'. Whitespace surrounded the routes is ignored. E.g. '/from ->
+                               /to'.
+```
+
 * * *
 
-&copy; 2016-19 Lloyd Brookes <75pound@gmail.com>.
+&copy; 2016-19 Lloyd Brookes \<75pound@gmail.com\>.
