@@ -13,7 +13,7 @@ class Rewrite extends EventEmitter {
         type: String,
         multiple: true,
         typeLabel: '{underline expression} ...',
-        description: "A list of URL rewrite rules. For each rule, separate the 'from' and 'to' routes with '->'. Whitespace surrounded the routes is ignored. E.g. '/from -> /to'."
+        description: "A list of URL rewrite rules. For each rule, separate the 'from' and 'to' routes with '->'. Whitespace surrounding the routes is ignored. E.g. '/from -> /to'."
       }
     ]
   }
