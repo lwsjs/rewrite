@@ -44,19 +44,10 @@ class Rewrite extends EventEmitter {
 function proxyRequest (route, mw) {
   let id = 1
   return async function proxyMiddleware (ctx) {
-    const util = require('./lib/util')
     ctx.state.id = id++
 
-    /* get incoming request body */
-    let reqBody
-    if (ctx.request.rawBody) {
-      reqBody = ctx.request.rawBody
-    } else {
-      const streamReadAll = require('stream-read-all')
-      reqBody = await streamReadAll(ctx.req)
-    }
-
     /* get remote URL */
+    const util = require('./lib/util')
     const remoteUrl = util.getToUrl(ctx.url, route)
 
     /* info about this rewrite */
@@ -72,29 +63,28 @@ function proxyRequest (route, mw) {
       method: ctx.request.method,
       headers: ctx.request.headers
     }
-    if (reqBody && reqBody.length) reqInfo.body = reqBody.toString()
+
+    const url = require('url')
+    reqInfo.headers.host = url.parse(reqInfo.rewrite.to).host
+
     mw.emit('verbose', 'middleware.rewrite.remote.request', reqInfo)
 
-    const response = await util.fetchRemoteResource(remoteUrl, ctx.request.method, ctx.request.headers, reqBody)
-
-    /* emit remote response */
-    mw.emit('verbose', 'middleware.rewrite.remote.response', {
-      rewrite,
-      status: response.statusCode,
-      headers: response.headers,
-      body: response.body
-    })
-
-    /* copy remote headers to the response */
-    const ignored = [ 'transfer-encoding', 'content-encoding' ]
-    for (const key in response.headers) {
-      if (!ignored.includes(key.toLowerCase())) {
-        ctx.response.set(key, response.headers[key])
-      }
-    }
-
-    ctx.status = response.statusCode
-    ctx.response.body = response.body
+    const request = require('request')
+    ctx.respond = false
+    ctx.req.pipe(
+      request({
+        url: reqInfo.rewrite.to,
+        method: reqInfo.method,
+        headers: reqInfo.headers
+      })
+      .on('response', response => {
+        mw.emit('verbose', 'middleware.rewrite.remote.response', {
+          rewrite,
+          status: response.statusCode,
+          headers: response.headers
+        })
+      })
+    ).pipe(ctx.res)
   }
 }
 

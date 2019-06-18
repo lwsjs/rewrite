@@ -28,12 +28,6 @@ tom.test('parseRewriteRules', async function () {
   ])
 })
 
-tom.test('fetchRemoteResource', async function () {
-  const response = await util.fetchRemoteResource('https://jsonplaceholder.typicode.com/posts/1')
-  a.strictEqual(response.statusCode, 200)
-  a.strictEqual(JSON.parse(response.body).id, 1)
-})
-
 tom.test('getToUrl: no params', async function () {
   const route = { from: '/one', to: '/two' }
   const result = util.getToUrl('/one', route)
