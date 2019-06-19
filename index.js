@@ -2,7 +2,7 @@ const EventEmitter = require('events')
 
 class Rewrite extends EventEmitter {
   description () {
-    return 'URL Rewriting. Use to re-route requests to local or remote destinations.'
+    return 'URL Rewriting. Use to re-route requests to local or remote resources.'
   }
 
   optionDefinitions () {
