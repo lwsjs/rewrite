@@ -43,48 +43,69 @@ class Rewrite extends EventEmitter {
 
 function proxyRequest (route, mw) {
   let id = 1
-  return async function proxyMiddleware (ctx) {
-    ctx.state.id = id++
+  return function proxyMiddleware (ctx) {
+    return new Promise((resolve, reject) => {
+      const isHttp2 = ctx.req.httpVersion === '2.0'
+      ctx.state.id = id++
 
-    /* get remote URL */
-    const util = require('./lib/util')
-    const remoteUrl = util.getToUrl(ctx.url, route)
+      /* get remote URL */
+      const util = require('./lib/util')
+      const remoteUrl = util.getToUrl(ctx.url, route)
 
-    /* info about this rewrite */
-    const rewrite = {
-      id: ctx.state.id,
-      from: ctx.url,
-      to: remoteUrl
-    }
+      /* info about this rewrite */
+      const rewrite = {
+        id: ctx.state.id,
+        from: ctx.url,
+        to: remoteUrl
+      }
 
-    /* emit verbose info */
-    const reqInfo = {
-      rewrite,
-      method: ctx.request.method,
-      headers: ctx.request.headers
-    }
+      /* emit verbose info */
+      const reqInfo = {
+        rewrite,
+        method: ctx.request.method,
+        headers: ctx.request.headers
+      }
 
-    const url = require('url')
-    reqInfo.headers.host = url.parse(reqInfo.rewrite.to).host
+      const url = require('url')
+      reqInfo.headers.host = url.parse(reqInfo.rewrite.to).host
 
-    mw.emit('verbose', 'middleware.rewrite.remote.request', reqInfo)
+      /* remove HTTP2 request headers */
+      if (isHttp2) {
+        for (const prop of Object.keys(ctx.request.headers)) {
+          if (prop.substr(0, 1) === ':') {
+            delete ctx.request.headers[prop]
+          }
+        }
+      }
 
-    const request = require('request')
-    ctx.respond = false
-    ctx.req.pipe(
-      request({
-        url: reqInfo.rewrite.to,
-        method: reqInfo.method,
-        headers: reqInfo.headers
-      })
-      .on('response', response => {
-        mw.emit('verbose', 'middleware.rewrite.remote.response', {
-          rewrite,
-          status: response.statusCode,
-          headers: response.headers
-        })
-      })
-    ).pipe(ctx.res)
+      mw.emit('verbose', 'middleware.rewrite.remote.request', reqInfo)
+
+      const request = require('request')
+      ctx.respond = false
+      ctx.req
+        .pipe(
+          request({
+            url: reqInfo.rewrite.to,
+            headers: reqInfo.headers,
+            method: reqInfo.method
+          })
+          .on('response', response => {
+            mw.emit('verbose', 'middleware.rewrite.remote.response', {
+              rewrite,
+              status: response.statusCode,
+              headers: response.headers
+            })
+            if (isHttp2) {
+              delete response.headers['transfer-encoding']
+              delete response.headers['connection']
+            }
+            resolve()
+          })
+        )
+        .on('error', reject)
+        .pipe(ctx.res)
+        .on('error', reject)
+    })
   }
 }
 
