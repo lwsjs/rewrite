@@ -48,7 +48,7 @@ tom.test('GET', async function () {
   } finally {
     lws.server.close()
   }
-}, { timeout: 60000 })
+}, { timeout: 120000 })
 
 tom.test('GET HTTPS', async function () {
   const port = 8100 + this.index
@@ -65,7 +65,7 @@ tom.test('GET HTTPS', async function () {
   } finally {
     lws.server.close()
   }
-}, { timeout: 60000 })
+}, { timeout: 120000 })
 
 tom.test('POST', async function () {
   const port = 8100 + this.index
@@ -93,7 +93,7 @@ tom.test('POST', async function () {
   } finally {
     lws.server.close()
   }
-}, { timeout: 60000 })
+}, { timeout: 120000 })
 
 tom.test('GET http2', async function () {
   const port = 8100 + this.index
@@ -110,7 +110,7 @@ tom.test('GET http2', async function () {
   } finally {
     lws.server.close()
   }
-}, { timeout: 60000 })
+}, { timeout: 120000 })
 
 tom.skip('GET HTTP2 npm, transfer-encoding', async function () {
   const port = 8100 + this.index
@@ -129,7 +129,7 @@ tom.skip('GET HTTP2 npm, transfer-encoding', async function () {
   } finally {
     lws.server.close()
   }
-}, { timeout: 60000 })
+}, { timeout: 120000 })
 
 tom.test('target host does not exist', async function () {
   const port = 8100 + this.index
@@ -146,7 +146,7 @@ tom.test('target host does not exist', async function () {
   } finally {
     lws.server.close()
   }
-}, { timeout: 60000 })
+}, { timeout: 120000 })
 
 tom.test('404 GET', async function () {
   const port = 8100 + this.index
@@ -161,7 +161,7 @@ tom.test('404 GET', async function () {
   } finally {
     lws.server.close()
   }
-}, { timeout: 60000 })
+}, { timeout: 120000 })
 
 tom.test('server connection reset', async function () {
   const net = require('net')
@@ -185,7 +185,7 @@ tom.test('server connection reset', async function () {
     lws.server.close()
     remoteServer.close()
   }
-}, { timeout: 60000 })
+}, { timeout: 120000 })
 
 tom.test('GET HTTPS, self-signed', async function () {
   const remoteLws = Lws.create({
@@ -209,4 +209,4 @@ tom.test('GET HTTPS, self-signed', async function () {
     lws.server.close()
     remoteLws.server.close()
   }
-}, { timeout: 60000 })
+}, { timeout: 120000 })
