@@ -8,6 +8,7 @@ const a = require('assert')
 const tom = module.exports = new Tom('proxy')
 
 tom.test('CONNECT request made to proxy', async function () {
+  process.env.http_proxy = 'http://127.0.0.1:9000'
   const port = 8200 + this.index
   const lws = Lws.create({
     port,
@@ -24,7 +25,6 @@ tom.test('CONNECT request made to proxy', async function () {
   proxyServer.listen(9000)
 
   try {
-    process.env.http_proxy = 'http://127.0.0.1:9000'
     await fetch(`http://localhost:${port}/one`)
     delete process.env.http_proxy
     a.strictEqual(proxyConnected, true)

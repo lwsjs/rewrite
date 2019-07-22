@@ -43,6 +43,16 @@ class Rewrite extends EventEmitter {
 
 function proxyRequest (route, mw) {
   let id = 1
+
+  let httpProxyAgent, httpsProxyAgent
+  const httpProxy = process.env.http_proxy
+  if (httpProxy) {
+    const HttpsProxyAgent = require('https-proxy-agent')
+    httpsProxyAgent = new HttpsProxyAgent(httpProxy)
+    const HttpProxyAgent = require('http-proxy-agent')
+    httpProxyAgent = new HttpProxyAgent(httpProxy)
+  }
+
   return function proxyMiddleware (ctx) {
     return new Promise((resolve, reject) => {
       const url = require('url')
@@ -94,8 +104,10 @@ function proxyRequest (route, mw) {
       const protocol = remoteReqOptions.protocol
       if (protocol === 'http:') {
         transport = require('http')
+        remoteReqOptions.agent = httpProxyAgent
       } else if (protocol === 'https:') {
         transport = require('https')
+        remoteReqOptions.agent = httpsProxyAgent
       } else {
         return reject(new Error('Protocol missing from request: ' + reqInfo.rewrite.to))
       }

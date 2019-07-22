@@ -22,6 +22,8 @@
   },
   "dependencies": {
     "array-back": "^3.1.0",
+    "http-proxy-agent": "^2.1.0",
+    "https-proxy-agent": "^2.2.2",
     "koa-rewrite-75lb": "^3.0.1",
     "koa-route": "^3.2.0",
     "path-to-regexp": "^3.0.0"
