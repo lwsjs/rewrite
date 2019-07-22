@@ -57,3 +57,18 @@ tom.test('getToUrl: replaced named param plus wildcard', async function () {
   const result = util.getToUrl('/api/2/data', route)
   a.strictEqual(result, 'http://example.com/2/data/api')
 })
+
+tom.test('removeHopSpecificHeaders', async function () {
+  const headers = {
+    'connection': 'test',
+    'keep-alive': 'test',
+    'proxy-authenticate': 'test',
+    'proxy-authorization': 'test',
+    'te': 'test',
+    'trailer': 'test',
+    'transfer-encoding': 'test',
+    'upgrade': 'test'
+  }
+  util.removeHopSpecificHeaders(headers)
+  a.deepStrictEqual(headers, {})
+})

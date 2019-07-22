@@ -4,7 +4,6 @@ const Static = require('lws-static')
 const Lws = require('lws')
 const fetch = require('node-fetch')
 const a = require('assert')
-const sleep = require('sleep-anywhere')
 
 const tom = module.exports = new Tom('proxy')
 
@@ -26,7 +25,7 @@ tom.test('CONNECT request made to proxy', async function () {
 
   try {
     process.env.http_proxy = 'http://127.0.0.1:9000'
-    const response = await fetch(`http://localhost:${port}/one`)
+    await fetch(`http://localhost:${port}/one`)
     delete process.env.http_proxy
     a.strictEqual(proxyConnected, true)
   } finally {

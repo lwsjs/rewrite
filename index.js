@@ -18,7 +18,7 @@ class Rewrite extends EventEmitter {
     ]
   }
 
-  middleware (options) {
+  middleware (options, lws) {
     const url = require('url')
     const util = require('./lib/util')
     const routes = util.parseRewriteRules(options.rewrite)
@@ -29,7 +29,7 @@ class Rewrite extends EventEmitter {
           /* `to` address is remote if the url specifies a host */
           if (url.parse(route.to).host) {
             const _ = require('koa-route')
-            return _.all(route.from, proxyRequest(route, this))
+            return _.all(route.from, proxyRequest(route, this, lws))
           } else {
             const rewrite = require('koa-rewrite-75lb')
             const rmw = rewrite(route.from, route.to, this)
@@ -45,8 +45,12 @@ function proxyRequest (route, mw) {
   let id = 1
   return function proxyMiddleware (ctx) {
     return new Promise((resolve, reject) => {
+      const url = require('url')
       const isHttp2 = ctx.req.httpVersion === '2.0'
       ctx.state.id = id++
+
+      /* disable Koa response mechanism, create and send response manually */
+      ctx.respond = false
 
       /* get remote URL */
       const util = require('./lib/util')
@@ -59,52 +63,60 @@ function proxyRequest (route, mw) {
         to: remoteUrl
       }
 
-      /* emit verbose info */
       const reqInfo = {
         rewrite,
         method: ctx.request.method,
         headers: ctx.request.headers
       }
 
-      const url = require('url')
+      /* ensure host header is set */
       reqInfo.headers.host = url.parse(reqInfo.rewrite.to).host
 
       /* remove HTTP2 request headers */
       if (isHttp2) {
         for (const prop of Object.keys(ctx.request.headers)) {
           if (prop.substr(0, 1) === ':') {
-            delete ctx.request.headers[prop]
+            delete reqInfo.headers[prop]
           }
         }
       }
 
+      reqInfo.headers.via = '1.1 lws-rewrite'
+
+      util.removeHopSpecificHeaders(reqInfo.headers)
+
+      let transport
+      const remoteReqOptions = url.parse(reqInfo.rewrite.to)
+      remoteReqOptions.method = reqInfo.method
+      remoteReqOptions.headers = reqInfo.headers
+      remoteReqOptions.rejectUnauthorized = false
+
+      const protocol = remoteReqOptions.protocol
+      if (protocol === 'http:') {
+        transport = require('http')
+      } else if (protocol === 'https:') {
+        transport = require('https')
+      } else {
+        return reject(new Error('Protocol missing from request: ' + reqInfo.rewrite.to))
+      }
+
+      /* emit verbose info */
       mw.emit('verbose', 'middleware.rewrite.remote.request', reqInfo)
 
-      const request = require('request')
-      ctx.respond = false
-      ctx.req
-        .pipe(
-          request({
-            url: reqInfo.rewrite.to,
-            headers: reqInfo.headers,
-            method: reqInfo.method
-          })
-          .on('response', response => {
-            mw.emit('verbose', 'middleware.rewrite.remote.response', {
-              rewrite,
-              status: response.statusCode,
-              headers: response.headers
-            })
-            if (isHttp2) {
-              delete response.headers['transfer-encoding']
-              delete response.headers['connection']
-            }
-            resolve()
-          })
-        )
-        .on('error', reject)
-        .pipe(ctx.res)
-        .on('error', reject)
+      const remoteReq = transport.request(remoteReqOptions, (remoteRes) => {
+        remoteRes.headers.via = remoteRes.headers.via ? `${remoteRes.headers.via}, 1.1 lws-rewrite` : '1.1 lws-rewrite'
+        mw.emit('verbose', 'middleware.rewrite.remote.response', {
+          rewrite,
+          status: remoteRes.statusCode,
+          headers: remoteRes.headers
+        })
+        util.removeHopSpecificHeaders(remoteRes.headers)
+        ctx.res.writeHead(remoteRes.statusCode, remoteRes.headers)
+        remoteRes.pipe(ctx.res)
+        resolve()
+      })
+      ctx.req.pipe(remoteReq)
+      remoteReq.on('error', reject)
     })
   }
 }
