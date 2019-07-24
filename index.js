@@ -116,7 +116,9 @@ function proxyRequest (route, mw) {
       mw.emit('verbose', 'middleware.rewrite.remote.request', reqInfo)
 
       const remoteReq = transport.request(remoteReqOptions, (remoteRes) => {
-        remoteRes.headers.via = remoteRes.headers.via ? `${remoteRes.headers.via}, 1.1 lws-rewrite` : '1.1 lws-rewrite'
+        remoteRes.headers.via = remoteRes.headers.via
+          ? `${remoteRes.headers.via}, 1.1 lws-rewrite`
+          : '1.1 lws-rewrite'
         mw.emit('verbose', 'middleware.rewrite.remote.response', {
           rewrite,
           status: remoteRes.statusCode,
@@ -127,7 +129,11 @@ function proxyRequest (route, mw) {
         remoteRes.pipe(ctx.res)
         resolve()
       })
-      ctx.req.pipe(remoteReq)
+      if (ctx.request.rawBody) {
+        remoteReq.end(ctx.request.rawBody)
+      } else {
+        ctx.req.pipe(remoteReq)
+      }
       remoteReq.on('error', reject)
     })
   }

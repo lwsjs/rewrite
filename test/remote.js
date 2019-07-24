@@ -95,6 +95,34 @@ tom.test('POST', async function () {
   }
 }, { timeout: 120000 })
 
+tom.test('POST with body-parser', async function () {
+  const port = 8100 + this.index
+  const lws = Lws.create({
+    port,
+    stack: [ 'lws-body-parser', Rewrite, Static ],
+    rewrite: { from: '/api/posts', to: 'https://jsonplaceholder.typicode.com/posts' }
+  })
+  try {
+    const response = await fetch(`http://localhost:${port}/api/posts`, {
+      method: 'POST',
+      body: JSON.stringify({
+        title: 'title',
+        body: 'body',
+        userId: 1
+      }),
+      headers: {
+        'Content-type': 'application/json; charset=UTF-8'
+      }
+    })
+    a.strictEqual(response.status, 201)
+    const body = await response.json()
+    a.strictEqual(body.title, 'title')
+    a.strictEqual(body.body, 'body')
+  } finally {
+    lws.server.close()
+  }
+}, { timeout: 120000 })
+
 tom.test('GET http2', async function () {
   const port = 8100 + this.index
   const lws = Lws.create({
