@@ -196,13 +196,13 @@ tom.test('server connection reset', async function () {
   const remoteServer = net.createServer(socket => {
     socket.end()
   })
-  remoteServer.listen({ port: 10010 })
+  remoteServer.listen({ port: 8200 })
 
   const port = 8100 + this.index
   const lws = Lws.create({
     port,
     stack: [ require('lws-err-detail'), Rewrite, Static ],
-    rewrite: { from: '/(.*)', to: 'http://localhost:10010/$1' }
+    rewrite: { from: '/(.*)', to: 'http://localhost:8200/$1' }
   })
   try {
     const response = await fetch(`http://localhost:${port}/package.json`)
