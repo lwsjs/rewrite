@@ -73,6 +73,11 @@ function proxyRequest (route, mw) {
         to: remoteUrl
       }
 
+      /* if lws-request-monitor added a `requestId`, include that in the verbose output */
+      if (typeof ctx.req.requestId === 'number') {
+        rewrite.requestId = ctx.req.requestId
+      }
+
       const reqInfo = {
         rewrite,
         method: ctx.request.method,
