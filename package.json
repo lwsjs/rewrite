@@ -23,14 +23,14 @@
   "dependencies": {
     "array-back": "^4.0.0",
     "http-proxy-agent": "^2.1.0",
-    "https-proxy-agent": "^2.2.2",
+    "https-proxy-agent": "^3.0.0",
     "koa-rewrite-75lb": "^3.0.1",
     "koa-route": "^3.2.0",
     "path-to-regexp": "^3.1.0"
   },
   "devDependencies": {
-    "coveralls": "^3.0.6",
-    "lws": "^2.0.3",
+    "coveralls": "^3.0.7",
+    "lws": "^2.0.6",
     "lws-body-parser": "^1.0.2",
     "lws-cors": "^2.0.1",
     "lws-err-detail": "^1.0.2",
