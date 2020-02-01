@@ -14,6 +14,11 @@ class Rewrite extends EventEmitter {
         multiple: true,
         typeLabel: '{underline expression} ...',
         description: "A list of URL rewrite rules. For each rule, separate the 'from' and 'to' routes with '->'. Whitespace surrounding the routes is ignored. E.g. '/from -> /to'."
+      },
+      {
+        name: 'rewrite.dropsecurecookieflag',
+        type: Boolean,
+        description: 'Drop the secure flag from remote cookies. This can be useful when rewriting to a secure location that sets secure cookies that then should get set on localhost.'
       }
     ]
   }
@@ -41,7 +46,7 @@ class Rewrite extends EventEmitter {
   }
 }
 
-function proxyRequest (route, mw) {
+function proxyRequest (route, mw, lws) {
   let id = 1
 
   let httpProxyAgent, httpsProxyAgent
@@ -130,6 +135,9 @@ function proxyRequest (route, mw) {
           headers: remoteRes.headers
         })
         util.removeHopSpecificHeaders(remoteRes.headers)
+        if (lws.config.rewriteDropsecurecookieflag) {
+          util.removeFlagFromCookies(remoteRes.headers, 'secure')
+        }
         ctx.res.writeHead(remoteRes.statusCode, remoteRes.headers)
         remoteRes.pipe(ctx.res)
         resolve()
