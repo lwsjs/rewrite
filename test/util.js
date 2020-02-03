@@ -72,3 +72,27 @@ tom.test('removeHopSpecificHeaders', async function () {
   util.removeHopSpecificHeaders(headers)
   a.deepStrictEqual(headers, {})
 })
+
+tom.test('removeCookieAttribute', async function () {
+  const setCookie = 'lastVisit=03/02/2020, 23:02:40; path=/; secure; httponly'
+  const result = util.removeCookieAttribute(setCookie, 'secure')
+  a.strictEqual(result, 'lastVisit=03/02/2020, 23:02:40; path=/; httponly')
+})
+
+tom.test('removeCookieAttribute 2', async function () {
+  const setCookie = 'lastVisit=03/02/2020, 23:02:40;Secure; httponly'
+  const result = util.removeCookieAttribute(setCookie, 'secure')
+  a.strictEqual(result, 'lastVisit=03/02/2020, 23:02:40; httponly')
+})
+
+tom.test('removeCookieAttribute 3', async function () {
+  const setCookie = ''
+  const result = util.removeCookieAttribute(setCookie, 'secure')
+  a.strictEqual(result, '')
+})
+
+tom.test('removeCookieAttribute 4', async function () {
+  const setCookie = undefined
+  const result = util.removeCookieAttribute(setCookie, 'secure')
+  a.strictEqual(result, '')
+})
