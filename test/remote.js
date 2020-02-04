@@ -238,3 +238,108 @@ tom.test('GET HTTPS, self-signed', async function () {
     remoteLws.server.close()
   }
 }, { timeout: 120000 })
+
+tom.test('GET HTTPS, secure cookie attribute set - remove it', async function () {
+  class SecureCookie {
+    middleware (config, lws) {
+      return function (ctx, next) {
+        const secure = true
+        const lastVisit = ctx.cookies.get('lastVisit')
+        ctx.cookies.set('test', 'one', { secure })
+        ctx.body = 'test'
+      }
+    }
+  }
+  const remotePort = 10000 + this.index
+  const remoteLws = Lws.create({
+    port: remotePort,
+    https: true,
+    stack: [ SecureCookie ]
+  })
+
+  const port = 8100 + this.index
+  const lws = Lws.create({
+    port,
+    stack: [ Rewrite, Static ],
+    rewrite: { from: '/', to: `https://localhost:${remotePort}/` }
+  })
+  try {
+    const response = await fetch(`http://localhost:${port}/`)
+    a.strictEqual(response.status, 200)
+    a.strictEqual(response.headers.get('set-cookie'), 'test=one; path=/; httponly')
+  } finally {
+    lws.server.close()
+    remoteLws.server.close()
+  }
+}, { timeout: 120000 })
+
+tom.test('GET HTTPS, --rewrite.keep-secure-attr', async function () {
+  class SecureCookie {
+    middleware (config, lws) {
+      return function (ctx, next) {
+        const secure = true
+        const lastVisit = ctx.cookies.get('lastVisit')
+        ctx.cookies.set('test', 'one', { secure })
+        ctx.body = 'test'
+      }
+    }
+  }
+  const remotePort = 10000 + this.index
+  const remoteLws = Lws.create({
+    port: remotePort,
+    https: true,
+    stack: [ SecureCookie ]
+  })
+
+  const port = 8100 + this.index
+  const lws = Lws.create({
+    port,
+    stack: [ Rewrite, Static ],
+    rewrite: { from: '/', to: `https://localhost:${remotePort}/` },
+    rewriteKeepSecureAttr: true
+  })
+  try {
+    const response = await fetch(`http://localhost:${port}/`)
+    a.strictEqual(response.status, 200)
+    a.strictEqual(response.headers.get('set-cookie'), 'test=one; path=/; secure; httponly')
+  } finally {
+    lws.server.close()
+    remoteLws.server.close()
+  }
+}, { timeout: 120000 })
+
+tom.test('GET HTTPS, --rewrite.keep-secure-attr, multiple cookies', async function () {
+  class SecureCookie {
+    middleware (config, lws) {
+      return function (ctx, next) {
+        const secure = true
+        const lastVisit = ctx.cookies.get('lastVisit')
+        ctx.cookies.set('test', 'one', { secure })
+        ctx.cookies.set('test2', 'two', { secure })
+        ctx.body = 'test'
+      }
+    }
+  }
+  const remotePort = 10000 + this.index
+  const remoteLws = Lws.create({
+    port: remotePort,
+    https: true,
+    stack: [ SecureCookie ]
+  })
+
+  const port = 8100 + this.index
+  const lws = Lws.create({
+    port,
+    stack: [ Rewrite, Static ],
+    rewrite: { from: '/', to: `https://localhost:${remotePort}/` },
+    rewriteKeepSecureAttr: true
+  })
+  try {
+    const response = await fetch(`http://localhost:${port}/`)
+    a.strictEqual(response.status, 200)
+    a.strictEqual(response.headers.get('set-cookie'), 'test=one; path=/; secure; httponly, test2=two; path=/; secure; httponly')
+  } finally {
+    lws.server.close()
+    remoteLws.server.close()
+  }
+}, { timeout: 120000 })

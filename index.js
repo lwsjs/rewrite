@@ -14,6 +14,11 @@ class Rewrite extends EventEmitter {
         multiple: true,
         typeLabel: '{underline expression} ...',
         description: "A list of URL rewrite rules. For each rule, separate the 'from' and 'to' routes with '->'. Whitespace surrounding the routes is ignored. E.g. '/from -> /to'."
+      },
+      {
+        name: 'rewrite.keep-secure-attr',
+        type: Boolean,
+        description: 'On insecure connections (e.g. a plain HTTP server), the default behaviour is to remove the `secure` attribute from cookies set by remote targets. Set this flag to leave remote `secure` cookies untouched - this may prevent cookies functioning correctly if your local server is insecure (i.e. not HTTP2 or HTTPS).'
       }
     ]
   }
@@ -41,7 +46,7 @@ class Rewrite extends EventEmitter {
   }
 }
 
-function proxyRequest (route, mw) {
+function proxyRequest (route, mw, lws) {
   let id = 1
 
   let httpProxyAgent, httpsProxyAgent
@@ -130,6 +135,14 @@ function proxyRequest (route, mw) {
           headers: remoteRes.headers
         })
         util.removeHopSpecificHeaders(remoteRes.headers)
+
+        /* On insecure connections, remove `secure` attribute from remote cookies */
+        const setCookies = remoteRes.headers['set-cookie']
+        if (!ctx.req.socket.encrypted && !lws.config.rewriteKeepSecureAttr && setCookies && setCookies.length) {
+          const cookies = setCookies.map(c => util.removeCookieAttribute(c, 'secure'))
+          remoteRes.headers['set-cookie'] = cookies
+        }
+
         ctx.res.writeHead(remoteRes.statusCode, remoteRes.headers)
         remoteRes.pipe(ctx.res)
         resolve()
