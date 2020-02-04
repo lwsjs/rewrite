@@ -239,7 +239,7 @@ tom.test('GET HTTPS, self-signed', async function () {
   }
 }, { timeout: 120000 })
 
-tom.test('GET HTTPS, secure cookie attribute set', async function () {
+tom.test('GET HTTPS, secure cookie attribute set - remove it', async function () {
   class SecureCookie {
     middleware (config, lws) {
       return function (ctx, next) {
@@ -266,14 +266,14 @@ tom.test('GET HTTPS, secure cookie attribute set', async function () {
   try {
     const response = await fetch(`http://localhost:${port}/`)
     a.strictEqual(response.status, 200)
-    a.strictEqual(response.headers.get('set-cookie'), 'test=one; path=/; secure; httponly')
+    a.strictEqual(response.headers.get('set-cookie'), 'test=one; path=/; httponly')
   } finally {
     lws.server.close()
     remoteLws.server.close()
   }
 }, { timeout: 120000 })
 
-tom.test('GET HTTPS, rmeove secure cookie attribute', async function () {
+tom.test('GET HTTPS, --rewrite.keep-secure-attr', async function () {
   class SecureCookie {
     middleware (config, lws) {
       return function (ctx, next) {
@@ -296,19 +296,19 @@ tom.test('GET HTTPS, rmeove secure cookie attribute', async function () {
     port,
     stack: [ Rewrite, Static ],
     rewrite: { from: '/', to: `https://localhost:${remotePort}/` },
-    rewriteDropSecureAttr: true
+    rewriteKeepSecureAttr: true
   })
   try {
     const response = await fetch(`http://localhost:${port}/`)
     a.strictEqual(response.status, 200)
-    a.strictEqual(response.headers.get('set-cookie'), 'test=one; path=/; httponly')
+    a.strictEqual(response.headers.get('set-cookie'), 'test=one; path=/; secure; httponly')
   } finally {
     lws.server.close()
     remoteLws.server.close()
   }
 }, { timeout: 120000 })
 
-tom.test('GET HTTPS, rmeove secure cookie attribute, multiple cookies', async function () {
+tom.test('GET HTTPS, --rewrite.keep-secure-attr, multiple cookies', async function () {
   class SecureCookie {
     middleware (config, lws) {
       return function (ctx, next) {
@@ -332,12 +332,12 @@ tom.test('GET HTTPS, rmeove secure cookie attribute, multiple cookies', async fu
     port,
     stack: [ Rewrite, Static ],
     rewrite: { from: '/', to: `https://localhost:${remotePort}/` },
-    rewriteDropSecureAttr: true
+    rewriteKeepSecureAttr: true
   })
   try {
     const response = await fetch(`http://localhost:${port}/`)
     a.strictEqual(response.status, 200)
-    a.strictEqual(response.headers.get('set-cookie'), 'test=one; path=/; httponly, test2=two; path=/; httponly')
+    a.strictEqual(response.headers.get('set-cookie'), 'test=one; path=/; secure; httponly, test2=two; path=/; secure; httponly')
   } finally {
     lws.server.close()
     remoteLws.server.close()
