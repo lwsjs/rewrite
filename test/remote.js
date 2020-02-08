@@ -164,13 +164,13 @@ tom.test('target host does not exist', async function () {
   const lws = Lws.create({
     port,
     stack: [ require('lws-err-detail'), Rewrite, Static ],
-    rewrite: { from: '/', to: 'http://a.broken.target.net' }
+    rewrite: { from: '/', to: 'http://a.broken.target.ooooooo.net' }
   })
   try {
     const response = await fetch(`http://localhost:${port}/`)
-    a.strictEqual(response.status, 500)
     const body = await response.text()
-    a.ok(/Error: connect/.test(body))
+    a.strictEqual(response.status, 500)
+    a.ok(/ENOTFOUND/.test(body))
   } finally {
     lws.server.close()
   }
