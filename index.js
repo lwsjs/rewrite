@@ -18,7 +18,7 @@ class Rewrite extends EventEmitter {
       {
         name: 'rewrite.keep-secure-attr',
         type: Boolean,
-        description: 'On insecure connections (e.g. a plain HTTP server), the default behaviour is to remove the `secure` attribute from cookies set by remote targets. Set this flag to leave remote `secure` cookies untouched - this may prevent cookies functioning correctly if your local server is insecure (i.e. not HTTP2 or HTTPS).'
+        description: 'When local-web-server is running in plain, insecure HTTP mode (not HTTPS or HTTP2), stripping the `secure` attribute from remote, rewrite-target cookies is the default behaviour. Set this flag to leave remote `secure` cookies untouched - this may prevent cookies functioning correctly when your server is plain HTTP.'
       }
     ]
   }
