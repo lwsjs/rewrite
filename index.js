@@ -69,7 +69,7 @@ function proxyRequest (route, mw, lws) {
       ctx.respond = false
 
       /* get remote URL */
-      const remoteUrl = util.getRemoteTargetUrl(route.from, route.to, ctx.url)
+      const remoteUrl = util.getTargetUrl(route.from, route.to, ctx.url)
 
       /* info about this rewrite */
       const rewrite = {
@@ -159,7 +159,7 @@ function proxyRequest (route, mw, lws) {
 
 function rewrite (from, to, mw) {
   return async function (ctx, next) {
-    const targetUrl = util.getLocalTargetUrl(from, to, ctx.url)
+    const targetUrl = util.getTargetUrl(from, to, ctx.url)
     if (ctx.url !== targetUrl) {
       const initialUrl = ctx.url
       ctx.url = targetUrl

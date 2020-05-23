@@ -6,10 +6,5 @@ if (!(from && to && url)) {
   console.log('USAGE:')
   console.log('$ lws-rewrite <from> <to> <url>')
 } else {
-  const urlUtil = require('url')
-  if (urlUtil.parse(to).host) {
-    console.log(util.getRemoteTargetUrl(from, to, url))
-  } else {
-    console.log(util.getRemoteTargetUrl(from, to, url))
-  }
+  console.log(util.getTargetUrl(from, to, url))
 }

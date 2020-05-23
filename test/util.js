@@ -29,32 +29,32 @@ tom.test('parseRewriteRules', async function () {
 })
 
 tom.test('getToUrl: no params', async function () {
-  const result = util.getRemoteTargetUrl('/one', '/two', '/one')
+  const result = util.getTargetUrl('/one', '/two', '/one')
   a.strictEqual(result, '/two')
 })
 
 tom.test('getToUrl: replace named parameter', async function () {
-  const result = util.getRemoteTargetUrl('/one/:id', '/:id/two', '/one/2')
+  const result = util.getTargetUrl('/one/:id', '/:id/two', '/one/2')
   a.strictEqual(result, '/2/two')
 })
 
 tom.test("getToUrl: don't replace named parameter", async function () {
-  const result = util.getRemoteTargetUrl('/one/:id', '/:id/two', '/one/2/one')
+  const result = util.getTargetUrl('/one/:id', '/:id/two', '/one/2/one')
   a.strictEqual(result, '/one/2/one')
 })
 
 tom.test('getToUrl: replace named parameter twice', async function () {
-  const result = util.getRemoteTargetUrl('/one/:id', '/:id/two/:id', '/one/2')
+  const result = util.getTargetUrl('/one/:id', '/:id/two/:id', '/one/2')
   a.strictEqual(result, '/2/two/2')
 })
 
 tom.test('getToUrl: replaced wildcard', async function () {
-  const result = util.getRemoteTargetUrl('/(.*)', 'http://example.com/$1', '/api/2/data')
+  const result = util.getTargetUrl('/(.*)', 'http://example.com/$1', '/api/2/data')
   a.strictEqual(result, 'http://example.com/api/2/data')
 })
 
 tom.test('getToUrl: replaced named param plus wildcard', async function () {
-  const result = util.getRemoteTargetUrl('/:name/(.*)', 'http://example.com/$2/:name', '/api/2/data')
+  const result = util.getTargetUrl('/:name/(.*)', 'http://example.com/$2/:name', '/api/2/data')
   a.strictEqual(result, 'http://example.com/2/data/api')
 })
 
