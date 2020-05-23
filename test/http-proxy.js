@@ -12,7 +12,7 @@ tom.test('CONNECT request made to proxy', async function () {
   const port = 8200 + this.index
   const lws = Lws.create({
     port,
-    stack: [ Rewrite, Static ],
+    stack: [Rewrite, Static],
     rewrite: { from: '/one', to: 'http://jsonplaceholder.typicode.com/posts/1' }
   })
 
@@ -20,7 +20,7 @@ tom.test('CONNECT request made to proxy', async function () {
   const net = require('net')
   const proxyServer = net.createServer(async function (c) {
     proxyConnected = true
-    c.end(`HTTP/1.1 200 Connection Established\nConnection: close\n\n`)
+    c.end('HTTP/1.1 200 Connection Established\nConnection: close\n\n')
   })
   proxyServer.listen(9000)
 

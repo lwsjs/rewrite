@@ -13,6 +13,7 @@
     "rewrite",
     "proxy"
   ],
+  "bin": "bin/cli.js",
   "engines": {
     "node": ">=10"
   },
@@ -24,24 +25,24 @@
     "array-back": "^4.0.1",
     "http-proxy-agent": "^4.0.1",
     "https-proxy-agent": "^5.0.0",
-    "koa-rewrite-75lb": "^3.0.1",
     "koa-route": "^3.2.0",
     "path-to-regexp": "^6.1.0"
   },
   "devDependencies": {
-    "coveralls": "^3.0.9",
-    "lws": "^3.0.0",
+    "coveralls": "^3.1.0",
+    "lws": "^3.1.0",
     "lws-body-parser": "^2.0.0",
     "lws-cors": "^3.0.0",
     "lws-err-detail": "^2.0.0",
     "lws-static": "^2.0.0",
     "node-fetch": "^2.6.0",
-    "nyc": "^15.0.0",
+    "nyc": "^15.0.1",
     "test-runner": "^0.8.13"
   },
   "files": [
     "index.js",
-    "lib/*.js"
+    "lib/*.js",
+    "bin/*.js"
   ],
   "standard": {
     "ignore": [

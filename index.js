@@ -1,4 +1,5 @@
 const EventEmitter = require('events')
+const util = require('./lib/util')
 
 class Rewrite extends EventEmitter {
   description () {
@@ -26,18 +27,18 @@ class Rewrite extends EventEmitter {
   middleware (options, lws) {
     const url = require('url')
     const util = require('./lib/util')
-    const routes = util.parseRewriteRules(options.rewrite)
-    if (routes.length) {
-      this.emit('verbose', 'middleware.rewrite.config', { rewrite: routes })
-      return routes.map(route => {
-        if (route.to) {
+    const rules = util.parseRewriteRules(options.rewrite)
+    if (rules.length) {
+      this.emit('verbose', 'middleware.rewrite.config', { rewrite: rules })
+      /* return one middleware per defined rewrite rule */
+      return rules.map(rule => {
+        if (rule.to) {
           /* `to` address is remote if the url specifies a host */
-          if (url.parse(route.to).host) {
+          if (url.parse(rule.to).host) {
             const _ = require('koa-route')
-            return _.all(route.from, proxyRequest(route, this, lws))
+            return _.all(rule.from, proxyRequest(rule, this, lws))
           } else {
-            const rewrite = require('koa-rewrite-75lb')
-            const rmw = rewrite(route.from, route.to, this)
+            const rmw = rewrite(rule.from, rule.to, this)
             return rmw
           }
         }
@@ -68,8 +69,7 @@ function proxyRequest (route, mw, lws) {
       ctx.respond = false
 
       /* get remote URL */
-      const util = require('./lib/util')
-      const remoteUrl = util.getToUrl(ctx.url, route)
+      const remoteUrl = util.getRemoteTargetUrl(route.from, route.to, ctx.url)
 
       /* info about this rewrite */
       const rewrite = {
@@ -154,6 +154,26 @@ function proxyRequest (route, mw, lws) {
       }
       remoteReq.on('error', reject)
     })
+  }
+}
+
+function rewrite (from, to, mw) {
+  return async function (ctx, next) {
+    const targetUrl = util.getLocalTargetUrl(from, to, ctx.url)
+    if (ctx.url !== targetUrl) {
+      const initialUrl = ctx.url
+      ctx.url = targetUrl
+
+      mw.emit('verbose', 'middleware.rewrite.local', {
+        from: initialUrl,
+        to: ctx.url
+      })
+
+      await next()
+      ctx.url = initialUrl
+    } else {
+      await next()
+    }
   }
 }
 

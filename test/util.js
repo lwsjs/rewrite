@@ -29,45 +29,45 @@ tom.test('parseRewriteRules', async function () {
 })
 
 tom.test('getToUrl: no params', async function () {
-  const route = { from: '/one', to: '/two' }
-  const result = util.getToUrl('/one', route)
+  const result = util.getRemoteTargetUrl('/one', '/two', '/one')
   a.strictEqual(result, '/two')
 })
 
 tom.test('getToUrl: replace named parameter', async function () {
-  const route = { from: '/one/:id', to: '/:id/two' }
-  const result = util.getToUrl('/one/2', route)
+  const result = util.getRemoteTargetUrl('/one/:id', '/:id/two', '/one/2')
   a.strictEqual(result, '/2/two')
 })
 
+tom.test("getToUrl: don't replace named parameter", async function () {
+  const result = util.getRemoteTargetUrl('/one/:id', '/:id/two', '/one/2/one')
+  a.strictEqual(result, '/one/2/one')
+})
+
 tom.test('getToUrl: replace named parameter twice', async function () {
-  const route = { from: '/one/:id', to: '/:id/two/:id' }
-  const result = util.getToUrl('/one/2', route)
+  const result = util.getRemoteTargetUrl('/one/:id', '/:id/two/:id', '/one/2')
   a.strictEqual(result, '/2/two/2')
 })
 
 tom.test('getToUrl: replaced wildcard', async function () {
-  const route = { from: '/(.*)', to: 'http://example.com/$1' }
-  const result = util.getToUrl('/api/2/data', route)
+  const result = util.getRemoteTargetUrl('/(.*)', 'http://example.com/$1', '/api/2/data')
   a.strictEqual(result, 'http://example.com/api/2/data')
 })
 
 tom.test('getToUrl: replaced named param plus wildcard', async function () {
-  const route = { from: '/:name/(.*)', to: 'http://example.com/$2/:name' }
-  const result = util.getToUrl('/api/2/data', route)
+  const result = util.getRemoteTargetUrl('/:name/(.*)', 'http://example.com/$2/:name', '/api/2/data')
   a.strictEqual(result, 'http://example.com/2/data/api')
 })
 
 tom.test('removeHopSpecificHeaders', async function () {
   const headers = {
-    'connection': 'test',
+    connection: 'test',
     'keep-alive': 'test',
     'proxy-authenticate': 'test',
     'proxy-authorization': 'test',
-    'te': 'test',
-    'trailer': 'test',
+    te: 'test',
+    trailer: 'test',
     'transfer-encoding': 'test',
-    'upgrade': 'test'
+    upgrade: 'test'
   }
   util.removeHopSpecificHeaders(headers)
   a.deepStrictEqual(headers, {})
