@@ -1,7 +1,8 @@
-[![view on npm](https://img.shields.io/npm/v/lws-rewrite.svg)](https://www.npmjs.org/package/lws-rewrite)
-[![npm module downloads](https://img.shields.io/npm/dt/lws-rewrite.svg)](https://www.npmjs.org/package/lws-rewrite)
+[![view on npm](https://badgen.net/npm/v/lws-rewrite)](https://www.npmjs.org/package/lws-rewrite)
+[![npm module downloads](https://badgen.net/npm/dt/lws-rewrite)](https://www.npmjs.org/package/lws-rewrite)
+[![Gihub repo dependents](https://badgen.net/github/dependents-repo/lwsjs/rewrite)](https://github.com/lwsjs/rewrite/network/dependents?dependent_type=REPOSITORY)
+[![Gihub package dependents](https://badgen.net/github/dependents-pkg/lwsjs/rewrite)](https://github.com/lwsjs/rewrite/network/dependents?dependent_type=PACKAGE)
 [![Build Status](https://travis-ci.org/lwsjs/rewrite.svg?branch=master)](https://travis-ci.org/lwsjs/rewrite)
-[![Dependency Status](https://badgen.net/david/dep/lwsjs/rewrite)](https://david-dm.org/lwsjs/rewrite)
 [![Coverage Status](https://coveralls.io/repos/github/lwsjs/rewrite/badge.svg)](https://coveralls.io/github/lwsjs/rewrite)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](https://github.com/feross/standard)
 
