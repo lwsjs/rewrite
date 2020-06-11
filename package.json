@@ -36,7 +36,7 @@
     "lws-err-detail": "^2.0.0",
     "lws-static": "^2.0.0",
     "node-fetch": "^2.6.0",
-    "nyc": "^15.0.1",
+    "nyc": "^15.1.0",
     "test-runner": "^0.8.13"
   },
   "files": [

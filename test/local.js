@@ -25,6 +25,23 @@ tom.test('simple', async function () {
   }
 })
 
+tom.test('no match', async function () {
+  const port = 8050 + this.index
+  const lws = Lws.create({
+    port,
+    stack: [ErrDetail, Rewrite, Static],
+    directory: 'test/fixture',
+    rewrite: { from: '/aaa.html', to: '/bbb.html' }
+  })
+  const response = await fetch(`http://localhost:${port}/one.html`)
+  const body = await response.text()
+  try {
+    a.strictEqual(body, 'one\n')
+  } finally {
+    lws.server.close()
+  }
+})
+
 tom.test('simple, using tokens', async function () {
   const port = 8050 + this.index
   const lws = Lws.create({
