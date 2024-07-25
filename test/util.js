@@ -1,8 +1,8 @@
-const Tom = require('test-runner').Tom
-const util = require('../lib/util')
-const a = require('assert')
+import TestRunner from 'test-runner'
+import util from '../lib/util.js'
+import { strict as a } from 'assert'
 
-const tom = module.exports = new Tom('util')
+const tom = new TestRunner.Tom()
 
 tom.test('parseRewriteRules: empty', async function () {
   const rules = []
@@ -101,3 +101,5 @@ tom.test('removeCookieAttribute 4', async function () {
   const result = util.removeCookieAttribute(setCookie, 'secure')
   a.strictEqual(result, '')
 })
+
+export default tom

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const util = require('../lib/util')
+import util from '../lib/util.js'
 const [from, to, url] = process.argv.slice(2)
 
 if (!(from && to && url)) {

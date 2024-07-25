@@ -1,5 +1,11 @@
-const EventEmitter = require('events')
-const util = require('./lib/util')
+import { EventEmitter } from 'events'
+import util from './lib/util.js'
+import url from 'url'
+import _ from 'koa-route'
+import HttpsProxyAgent from 'https-proxy-agent'
+import HttpProxyAgent from 'http-proxy-agent'
+import http from 'http'
+import https from 'https'
 
 class Rewrite extends EventEmitter {
   description () {
@@ -25,8 +31,6 @@ class Rewrite extends EventEmitter {
   }
 
   middleware (options, lws) {
-    const url = require('url')
-    const util = require('./lib/util')
     const rules = util.parseRewriteRules(options.rewrite)
     if (rules.length) {
       this.emit('verbose', 'middleware.rewrite.config', { rewrite: rules })
@@ -35,7 +39,6 @@ class Rewrite extends EventEmitter {
         if (rule.to) {
           /* `to` address is remote if the url specifies a host */
           if (url.parse(rule.to).host) {
-            const _ = require('koa-route')
             return _.all(rule.from, proxyRequest(rule, this, lws))
           } else {
             const rmw = rewrite(rule.from, rule.to, this)
@@ -53,15 +56,12 @@ function proxyRequest (route, mw, lws) {
   let httpProxyAgent, httpsProxyAgent
   const httpProxy = process.env.http_proxy
   if (httpProxy) {
-    const HttpsProxyAgent = require('https-proxy-agent')
     httpsProxyAgent = new HttpsProxyAgent(httpProxy)
-    const HttpProxyAgent = require('http-proxy-agent')
     httpProxyAgent = new HttpProxyAgent(httpProxy)
   }
 
   return function proxyMiddleware (ctx) {
     return new Promise((resolve, reject) => {
-      const url = require('url')
       const isHttp2 = ctx.req.httpVersion === '2.0'
       ctx.state.id = id++
 
@@ -111,19 +111,19 @@ function proxyRequest (route, mw, lws) {
       remoteReqOptions.headers = reqInfo.headers
       remoteReqOptions.rejectUnauthorized = false
 
+      /* emit verbose info */
+      mw.emit('verbose', 'middleware.rewrite.remote.request', reqInfo)
+
       const protocol = remoteReqOptions.protocol
       if (protocol === 'http:') {
-        transport = require('http')
+        transport = http
         remoteReqOptions.agent = httpProxyAgent
       } else if (protocol === 'https:') {
-        transport = require('https')
+        transport = https
         remoteReqOptions.agent = httpsProxyAgent
       } else {
         return reject(new Error('Protocol missing from request: ' + reqInfo.rewrite.to))
       }
-
-      /* emit verbose info */
-      mw.emit('verbose', 'middleware.rewrite.remote.request', reqInfo)
 
       const remoteReq = transport.request(remoteReqOptions, (remoteRes) => {
         remoteRes.headers.via = remoteRes.headers.via
@@ -177,4 +177,4 @@ function rewrite (from, to, mw) {
   }
 }
 
-module.exports = Rewrite
+export default Rewrite

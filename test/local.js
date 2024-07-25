@@ -1,16 +1,16 @@
-const Tom = require('test-runner').Tom
-const Rewrite = require('../')
-const Static = require('lws-static')
-const ErrDetail = require('lws-err-detail')
-const Lws = require('lws')
-const fetch = require('node-fetch')
-const a = require('assert')
+import { strict as a } from 'assert'
+import TestRunner from 'test-runner'
+import Rewrite from 'lws-rewrite'
+import Static from 'lws-static'
+import ErrDetail from 'lws-err-detail'
+import Lws from 'lws'
+import fetch from 'node-fetch'
 
-const tom = module.exports = new Tom('local')
+const tom = new TestRunner.Tom()
 
 tom.test('simple', async function () {
   const port = 8050 + this.index
-  const lws = Lws.create({
+  const lws = await Lws.create({
     port,
     stack: [ErrDetail, Rewrite, Static],
     directory: 'test/fixture',
@@ -27,7 +27,7 @@ tom.test('simple', async function () {
 
 tom.test('no match', async function () {
   const port = 8050 + this.index
-  const lws = Lws.create({
+  const lws = await Lws.create({
     port,
     stack: [ErrDetail, Rewrite, Static],
     directory: 'test/fixture',
@@ -44,7 +44,7 @@ tom.test('no match', async function () {
 
 tom.test('simple, using tokens', async function () {
   const port = 8050 + this.index
-  const lws = Lws.create({
+  const lws = await Lws.create({
     port,
     stack: [ErrDetail, Rewrite, Static],
     directory: 'test/fixture',
@@ -61,7 +61,7 @@ tom.test('simple, using tokens', async function () {
 
 tom.test('wildcard parameter', async function () {
   const port = 8050 + this.index
-  const lws = Lws.create({
+  const lws = await Lws.create({
     port,
     stack: [ErrDetail, Rewrite, Static],
     directory: 'test/fixture',
@@ -75,3 +75,5 @@ tom.test('wildcard parameter', async function () {
     lws.server.close()
   }
 })
+
+export default tom

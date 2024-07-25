@@ -1,14 +1,16 @@
-const Tom = require('test-runner').Tom
-const Rewrite = require('../')
-const Static = require('lws-static')
-const Lws = require('lws')
-const fetch = require('node-fetch')
-const a = require('assert')
+import TestRunner from 'test-runner'
+import Rewrite from 'lws-rewrite'
+import Static from 'lws-static'
+import Lws from 'lws'
+import fetch from 'node-fetch'
+import a from 'assert'
+import http2 from 'http2'
+import lwsErrDetail from 'lws-err-detail'
+import net from 'net'
 
-const tom = module.exports = new Tom('remote')
+const tom = new TestRunner.Tom()
 
 async function fetchHttp2 (host, path, reqHeaders) {
-  const http2 = require('http2')
   return new Promise((resolve, reject) => {
     const client = http2.connect(host, {
       rejectUnauthorized: false
@@ -35,7 +37,7 @@ async function fetchHttp2 (host, path, reqHeaders) {
 
 tom.test('GET', async function () {
   const port = 8100 + this.index
-  const lws = Lws.create({
+  const lws = await Lws.create({
     port,
     stack: [Rewrite, Static],
     rewrite: { from: '/json/:name/:id', to: 'http://jsonplaceholder.typicode.com/posts/:id' }
@@ -52,7 +54,7 @@ tom.test('GET', async function () {
 
 tom.test('GET HTTPS', async function () {
   const port = 8100 + this.index
-  const lws = Lws.create({
+  const lws = await Lws.create({
     port,
     stack: [Rewrite, Static],
     rewrite: { from: '/json/:name/:id', to: 'https://jsonplaceholder.typicode.com/posts/:id' }
@@ -69,7 +71,7 @@ tom.test('GET HTTPS', async function () {
 
 tom.test('POST', async function () {
   const port = 8100 + this.index
-  const lws = Lws.create({
+  const lws = await Lws.create({
     port,
     stack: [Rewrite, Static],
     rewrite: { from: '/api/posts', to: 'https://jsonplaceholder.typicode.com/posts' }
@@ -97,7 +99,7 @@ tom.test('POST', async function () {
 
 tom.test('POST with body-parser', async function () {
   const port = 8100 + this.index
-  const lws = Lws.create({
+  const lws = await Lws.create({
     port,
     stack: ['lws-body-parser', Rewrite, Static],
     rewrite: { from: '/api/posts', to: 'https://jsonplaceholder.typicode.com/posts' }
@@ -125,7 +127,7 @@ tom.test('POST with body-parser', async function () {
 
 tom.test('GET http2', async function () {
   const port = 8100 + this.index
-  const lws = Lws.create({
+  const lws = await Lws.create({
     port,
     stack: [Rewrite, Static],
     rewrite: { from: '/json/:name/:id', to: 'https://jsonplaceholder.typicode.com/posts/:id' },
@@ -142,7 +144,7 @@ tom.test('GET http2', async function () {
 
 tom.skip('GET HTTP2 npm, transfer-encoding', async function () {
   const port = 8100 + this.index
-  const lws = Lws.create({
+  const lws = await Lws.create({
     port,
     stack: [Rewrite, Static],
     rewrite: { from: '/npm/(.*)', to: 'http://registry.npmjs.org/$1' },
@@ -161,9 +163,9 @@ tom.skip('GET HTTP2 npm, transfer-encoding', async function () {
 
 tom.test('target host does not exist', async function () {
   const port = 8100 + this.index
-  const lws = Lws.create({
+  const lws = await Lws.create({
     port,
-    stack: [require('lws-err-detail'), Rewrite, Static],
+    stack: [lwsErrDetail, Rewrite, Static],
     rewrite: { from: '/', to: 'http://a.broken.target.ooooooo.net' }
   })
   try {
@@ -178,7 +180,7 @@ tom.test('target host does not exist', async function () {
 
 tom.test('404 GET', async function () {
   const port = 8100 + this.index
-  const lws = Lws.create({
+  const lws = await Lws.create({
     port,
     stack: [Rewrite, Static],
     rewrite: { from: '/(.*)', to: 'http://jsonplaceholder.typicode.com/$1' }
@@ -192,16 +194,15 @@ tom.test('404 GET', async function () {
 }, { timeout: 120000 })
 
 tom.test('server connection reset', async function () {
-  const net = require('net')
   const remoteServer = net.createServer(socket => {
     socket.end()
   })
   remoteServer.listen({ port: 8200 })
 
   const port = 8100 + this.index
-  const lws = Lws.create({
+  const lws = await Lws.create({
     port,
-    stack: [require('lws-err-detail'), Rewrite, Static],
+    stack: [lwsErrDetail, Rewrite, Static],
     rewrite: { from: '/(.*)', to: 'http://localhost:8200/$1' }
   })
   try {
@@ -216,14 +217,14 @@ tom.test('server connection reset', async function () {
 }, { timeout: 120000 })
 
 tom.test('GET HTTPS, self-signed', async function () {
-  const remoteLws = Lws.create({
+  const remoteLws = await Lws.create({
     port: 10000,
     https: true,
     stack: [Static]
   })
 
   const port = 8100 + this.index
-  const lws = Lws.create({
+  const lws = await Lws.create({
     port,
     stack: [Rewrite, Static],
     rewrite: { from: '/(.*)', to: 'https://localhost:10000/$1' }
@@ -250,14 +251,14 @@ tom.test('GET HTTPS, secure cookie attribute set - remove it', async function ()
     }
   }
   const remotePort = 10000 + this.index
-  const remoteLws = Lws.create({
+  const remoteLws = await Lws.create({
     port: remotePort,
     https: true,
     stack: [SecureCookie]
   })
 
   const port = 8100 + this.index
-  const lws = Lws.create({
+  const lws = await Lws.create({
     port,
     stack: [Rewrite, Static],
     rewrite: { from: '/', to: `https://localhost:${remotePort}/` }
@@ -283,14 +284,14 @@ tom.test('GET HTTPS, --rewrite.keep-secure-attr', async function () {
     }
   }
   const remotePort = 10000 + this.index
-  const remoteLws = Lws.create({
+  const remoteLws = await Lws.create({
     port: remotePort,
     https: true,
     stack: [SecureCookie]
   })
 
   const port = 8100 + this.index
-  const lws = Lws.create({
+  const lws = await Lws.create({
     port,
     stack: [Rewrite, Static],
     rewrite: { from: '/', to: `https://localhost:${remotePort}/` },
@@ -318,14 +319,14 @@ tom.test('GET HTTPS, --rewrite.keep-secure-attr, multiple cookies', async functi
     }
   }
   const remotePort = 10000 + this.index
-  const remoteLws = Lws.create({
+  const remoteLws = await Lws.create({
     port: remotePort,
     https: true,
     stack: [SecureCookie]
   })
 
   const port = 8100 + this.index
-  const lws = Lws.create({
+  const lws = await Lws.create({
     port,
     stack: [Rewrite, Static],
     rewrite: { from: '/', to: `https://localhost:${remotePort}/` },
@@ -340,3 +341,5 @@ tom.test('GET HTTPS, --rewrite.keep-secure-attr, multiple cookies', async functi
     remoteLws.server.close()
   }
 }, { timeout: 120000 })
+
+export default tom
