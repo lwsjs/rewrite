@@ -139,7 +139,13 @@ function proxyRequest (route, mw, lws) {
         /* On insecure connections, remove `secure` attribute from remote cookies */
         const setCookies = remoteRes.headers['set-cookie']
         if (!ctx.req.socket.encrypted && !lws.config.rewriteKeepSecureAttr && setCookies && setCookies.length) {
-          const cookies = setCookies.map(c => util.removeCookieAttribute(c, 'secure'))
+          const cookies = setCookies.map(c => {
+            let result = util.removeCookieAttribute(c, 'secure')
+            if (/samesite=none/.test(result)) {
+              result = util.removeCookieAttribute(result, 'samesite=none')
+            }
+            return result
+          })
           remoteRes.headers['set-cookie'] = cookies
         }
 
