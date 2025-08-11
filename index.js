@@ -8,11 +8,11 @@ import http from 'http'
 import https from 'https'
 
 class Rewrite extends EventEmitter {
-  description () {
+  description() {
     return 'URL Rewriting. Use to re-route requests to local or remote resources.'
   }
 
-  optionDefinitions () {
+  optionDefinitions() {
     return [
       {
         name: 'rewrite',
@@ -30,16 +30,24 @@ class Rewrite extends EventEmitter {
     ]
   }
 
-  middleware (options, lws) {
+  middleware(options, lws) {
     const rules = util.parseRewriteRules(options.rewrite)
+    let httpProxyAgent, httpsProxyAgent
+    const httpProxy = process.env.http_proxy
+    if (httpProxy) {
+      httpsProxyAgent = new HttpsProxyAgent(httpProxy)
+      httpProxyAgent = new HttpProxyAgent(httpProxy)
+    }
     if (rules.length) {
       this.emit('verbose', 'middleware.rewrite.config', { rewrite: rules })
+      /* attach websocket proxy (upgrade) handler once if there are any remote-capable rules */
+      setupWebSocketProxy(rules, this, lws, { httpProxyAgent, httpsProxyAgent })
       /* return one middleware per defined rewrite rule */
       return rules.map(rule => {
         if (rule.to) {
           /* `to` address is remote if the url specifies a host */
           if (url.parse(rule.to).host) {
-            return _.all(rule.from, proxyRequest(rule, this, lws))
+            return _.all(rule.from, proxyRequest(rule, this, lws, { httpProxyAgent, httpsProxyAgent }))
           } else {
             const rmw = rewrite(rule.from, rule.to, this)
             return rmw
@@ -50,17 +58,112 @@ class Rewrite extends EventEmitter {
   }
 }
 
-function proxyRequest (route, mw, lws) {
-  let id = 1
+function setupWebSocketProxy(rules, mw, lws, { httpProxyAgent, httpsProxyAgent }) {
+  /* only attach if there’s at least one rule pointing to a remote host (http/https/ws/wss) */
+  const hasRemoteRule = rules.some(r => {
+    if (!r || !r.to) return false
+    const parsed = url.parse(r.to)
+    return !!parsed.host && /^(https?:|wss?:)$/.test(parsed.protocol || 'http:')
+  })
+  if (!hasRemoteRule) return
 
-  let httpProxyAgent, httpsProxyAgent
-  const httpProxy = process.env.http_proxy
-  if (httpProxy) {
-    httpsProxyAgent = new HttpsProxyAgent(httpProxy)
-    httpProxyAgent = new HttpProxyAgent(httpProxy)
+  let attached = false
+
+  function attachUpgrade(server) {
+    if (attached || !server) return
+    attached = true
+
+    server.on('upgrade', (req, socket, head) => {
+      /* find a remote rule which matches the request */
+      const remoteRule = rules.find(rule => {
+        if (rule.to && url.parse(rule.to).host) {
+          const re = util.pathToRegexp(rule.from)
+          return re.test(req.url)
+        }
+      })
+
+      if (remoteRule) {
+        const targetUrl = util.getTargetUrl(remoteRule.from, remoteRule.to, req.url)
+        mw.emit('verbose', 'middleware.rewrite.ws.proxy', { from: req.url, to: targetUrl })
+
+        const remoteReqOptions = url.parse(targetUrl)
+        remoteReqOptions.headers = req.headers
+        remoteReqOptions.rejectUnauthorized = false
+        if (remoteReqOptions.protocol === 'ws:') {
+          remoteReqOptions.protocol = 'http:'
+        } else if (remoteReqOptions.protocol === 'wss:') {
+          remoteReqOptions.protocol = 'https:'
+        }
+
+        let transport
+        const protocol = remoteReqOptions.protocol
+        if (protocol === 'http:') {
+          transport = http
+          remoteReqOptions.agent = httpProxyAgent
+        } else if (protocol === 'https:') {
+          transport = https
+          remoteReqOptions.agent = httpsProxyAgent
+        }
+
+        const remoteReq = transport.request(remoteReqOptions)
+
+        remoteReq.on('response', (res) => {
+          /* the remote server sent a regular http response, not an upgrade, write it back to the client */
+          let headers = ''
+          for (const [key, value] of Object.entries(res.headers)) {
+            headers += `${key}: ${value}\r\n`
+          }
+          socket.write(`HTTP/1.1 ${res.statusCode} ${res.statusMessage}\r\n${headers}\r\n`)
+          res.pipe(socket)
+        })
+
+        remoteReq.on('upgrade', (remoteRes, remoteSocket, remoteHead) => {
+          /* write the upgrade response from target back to client */
+          let response = `HTTP/1.1 ${remoteRes.statusCode} ${remoteRes.statusMessage}\r\n`
+          for (let i = 0; i < remoteRes.rawHeaders.length; i += 2) {
+            response += `${remoteRes.rawHeaders[i]}: ${remoteRes.rawHeaders[i + 1]}\r\n`
+          }
+          response += '\r\n'
+          socket.write(response)
+
+          if (remoteHead && remoteHead.length) remoteSocket.write(remoteHead)
+          if (head && head.length) socket.write(head)
+
+          remoteSocket.pipe(socket).pipe(remoteSocket)
+
+          remoteSocket.on('error', (err) => { mw.emit('error', 'middleware.rewrite.ws.remote-socket-error', { err }); socket.destroy() })
+          socket.on('error', (err) => { mw.emit('error', 'middleware.rewrite.ws.client-socket-error', { err }); remoteSocket.destroy() })
+          remoteSocket.on('close', () => socket.destroy())
+          socket.on('close', () => remoteSocket.destroy())
+        })
+
+        remoteReq.on('error', (err) => {
+          mw.emit('error', 'middleware.rewrite.ws.error', { err })
+          socket.end('HTTP/1.1 502 Bad Gateway\r\n\r\n')
+        })
+
+        remoteReq.end()
+      }
+    })
   }
 
-  return function proxyMiddleware (ctx) {
+  if (lws && lws.server) {
+    attachUpgrade(lws.server)
+  } else {
+    /* server may not exist yet – try attaching shortly after */
+    const tryAttach = () => {
+      if (lws && lws.server) attachUpgrade(lws.server)
+      else setTimeout(tryAttach, 10)
+    }
+    tryAttach()
+  }
+}
+
+
+function proxyRequest(route, mw, lws, { httpProxyAgent, httpsProxyAgent }) {
+  let id = 1
+
+  return function proxyMiddleware(ctx) {
     return new Promise((resolve, reject) => {
       const isHttp2 = ctx.req.httpVersion === '2.0'
       ctx.state.id = id++
@@ -163,7 +266,7 @@ function proxyRequest (route, mw, lws) {
   }
 }
 
-function rewrite (from, to, mw) {
+function rewrite(from, to, mw) {
   return async function (ctx, next) {
     const targetUrl = util.getTargetUrl(from, to, ctx.url)
     if (ctx.url !== targetUrl) {
