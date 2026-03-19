@@ -1,6 +1,6 @@
 {
   "name": "lws-rewrite",
-  "author": "Lloyd Brookes <75pound@gmail.com>",
+  "author": "Lloyd Brookes <opensource@75lb.com>",
   "version": "4.0.0",
   "description": "lws middleware plugin adding URL rewriting support",
   "repository": {
@@ -29,19 +29,19 @@
   },
   "dependencies": {
     "array-back": "^6.2.2",
-    "http-proxy-agent": "^5.0.0",
-    "https-proxy-agent": "^5.0.1",
+    "http-proxy-agent": "^8.0.0",
+    "https-proxy-agent": "^8.0.0",
     "koa-route": "^4.0.1",
     "path-to-regexp": "^6.2.2"
   },
   "devDependencies": {
-    "lws": "^4.1.4",
-    "lws-body-parser": "^3.0.0",
+    "lws": "^4.2.0",
+    "lws-body-parser": "^3.0.1",
     "lws-cors": "^4.2.1",
     "lws-err-detail": "^2.0.0",
-    "lws-static": "^3.1.0",
+    "lws-static": "^3.1.1",
     "node-fetch": "^3.3.2",
-    "test-runner": "^0.11.0"
+    "test-runner": "^0.11.1"
   },
   "files": [
     "index.js",
